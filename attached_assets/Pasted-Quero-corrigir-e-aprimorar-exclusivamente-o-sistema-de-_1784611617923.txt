@@ -1,0 +1,537 @@
+Quero corrigir e aprimorar exclusivamente o sistema de proteção, rastreamento e verificação de arquivos do Meell Protect v1.0 Beta.
+
+Antes de alterar qualquer código, leia toda a implementação atual relacionada a:
+- creator-download
+- delivery-download
+- upload e armazenamento
+- protected_files
+- deliveries
+- delivery_copies
+- delivery_events
+- clients
+- rastreamento
+- Verificar Arquivo
+
+Preserve tudo que já funciona.
+
+==================================================
+1. CORRIGIR A VERSÃO PROTEGIDA DAS IMAGENS
+==================================================
+
+PROBLEMAS ATUAIS:
+
+1. Algumas imagens, especialmente PNG, estão saindo visualmente corrompidas após gerar a “Versão Protegida”, apresentando faixas, blocos, pixels deslocados ou alterações graves.
+
+2. Arquivos WEBP mantêm boa qualidade, porém aparentemente estão sendo baixados sem receber proteção/fingerprint real.
+
+CORREÇÃO:
+
+- Revise a Edge Function creator-download e qualquer função responsável por gerar a Versão Protegida.
+- NÃO aplique fingerprint modificando diretamente bytes brutos/comprimidos de PNG, JPG, JPEG ou WEBP.
+- A imagem deve ser corretamente decodificada para pixels, processada e depois recodificada.
+- Utilize processamento adequado, como Sharp, quando compatível com o ambiente atual.
+
+Adicionar suporte real para:
+
+- PNG
+- JPG/JPEG
+- WEBP
+
+A imagem protegida deve preservar:
+
+- aparência visual;
+- dimensões;
+- orientação;
+- transparência quando aplicável;
+- proporção;
+- qualidade o mais próximo possível do original.
+
+PNG não pode sair corrompido.
+WEBP deve receber proteção real.
+JPG/JPEG também deve funcionar corretamente.
+
+==================================================
+2. PROTEÇÃO EM CAMADA DUPLA
+==================================================
+
+Quero manter e aprimorar a Proteção em Camada Dupla.
+
+CAMADA 1 — IDENTIFICAÇÃO DO ARQUIVO
+
+Cada arquivo protegido deve possuir uma identificação única e persistente relacionada ao:
+
+- proprietário/criador;
+- protected_file_id;
+- copy_id;
+- delivery_id quando existir;
+- destinatário autorizado quando existir.
+
+Use fingerprint invisível ou técnica equivalente compatível com cada formato.
+
+Não aplique a proteção diretamente nos bytes comprimidos de forma que possa corromper o arquivo.
+
+CAMADA 2 — REGISTRO E RASTREABILIDADE
+
+Registrar no banco a relação entre:
+
+arquivo original
+→ cópia protegida
+→ proprietário
+→ destinatário
+→ entrega
+→ eventos relacionados.
+
+A função “Verificar Arquivo” deve conseguir consultar esses registros e identificar corretamente a origem da cópia quando a proteção estiver presente.
+
+==================================================
+3. CÓPIA IDÊNTICA X VERSÃO PROTEGIDA
+==================================================
+
+Manter claramente dois downloads diferentes.
+
+CÓPIA IDÊNTICA:
+
+Deve continuar sendo exatamente o arquivo original.
+
+Não adicionar:
+
+- fingerprint;
+- marca d’água;
+- alteração de pixels;
+- metadata de proteção;
+- nenhuma modificação.
+
+VERSÃO PROTEGIDA:
+
+Deve obrigatoriamente passar pelo mecanismo de proteção antes do download.
+
+Nunca retornar silenciosamente o arquivo original quando o usuário escolher “Versão Protegida”.
+
+Se um formato não puder ser protegido, mostrar erro claro em vez de entregar uma falsa “Versão Protegida”.
+
+==================================================
+4. RASTREAMENTO DE COMPARTILHAMENTOS
+==================================================
+
+Quero aprimorar o Rastreamento para registrar também quando uma cópia protegida for compartilhada por uma pessoa diferente do proprietário original.
+
+OBJETIVO:
+
+Quero conseguir visualizar uma cadeia de compartilhamentos como:
+
+PROPRIETÁRIO ORIGINAL
+↓
+compartilhou com CLIENTE A
+Data e horário
+
+CLIENTE A
+↓
+compartilhou com CLIENTE B
+Data e horário
+
+CLIENTE B
+↓
+compartilhou com CLIENTE C
+Data e horário
+
+O sistema deve manter a árvore/histórico completo de compartilhamentos.
+
+==================================================
+5. IDENTIFICAR QUEM COMPARTILHOU
+==================================================
+
+Quando um usuário/destinatário autorizado compartilhar um arquivo usando o fluxo controlado do Meell Protect, registrar:
+
+- nome de quem compartilhou;
+- ID de quem compartilhou;
+- e-mail, quando disponível;
+- nome do novo destinatário;
+- ID do novo destinatário;
+- e-mail do destinatário, quando disponível;
+- arquivo/cópia relacionada;
+- copy_id de origem;
+- nova copy_id gerada para o destinatário;
+- data exata;
+- horário exato;
+- timezone;
+- delivery_id;
+- tipo do evento.
+
+Exemplo:
+
+Arquivo:
+Agenda Candy 2027.pdf
+
+Proprietário:
+Mellody
+
+Primeira entrega:
+Mellody → Maria
+20/07/2026 às 14:32
+
+Novo compartilhamento:
+Maria → Ana
+21/07/2026 às 09:47
+
+Novo compartilhamento:
+Ana → João
+21/07/2026 às 15:22
+
+O proprietário deve conseguir visualizar essa cadeia no Rastreamento.
+
+==================================================
+6. NÃO FINGIR RASTREAMENTO FORA DA PLATAFORMA
+==================================================
+
+IMPORTANTE:
+
+Não implemente alegações falsas de rastreamento.
+
+O sistema NÃO deve afirmar que consegue descobrir automaticamente quem enviou um arquivo por:
+
+- WhatsApp;
+- Telegram;
+- e-mail externo;
+- Bluetooth;
+- pendrive;
+- Google Drive externo;
+- redes sociais;
+- outros meios fora do controle do Meell Protect.
+
+Se alguém simplesmente baixar o arquivo e enviar a cópia externamente, o Meell Protect pode identificar a origem da cópia através do fingerprint, caso ele sobreviva, mas não pode saber automaticamente quem realizou aquele compartilhamento externo, para quem enviou, nem a data/hora exata sem existir um evento registrado pela plataforma.
+
+Portanto:
+
+Para registrar com precisão:
+QUEM COMPARTILHOU + PARA QUEM + DATA + HORÁRIO
+
+o compartilhamento deve acontecer através de um fluxo controlado pelo Meell Protect.
+
+==================================================
+7. CRIAR FUNÇÃO “COMPARTILHAR COM PROTEÇÃO”
+==================================================
+
+Criar ou adaptar um fluxo seguro chamado:
+
+“Compartilhar com proteção”
+
+Quando um destinatário autorizado quiser compartilhar o arquivo com outra pessoa:
+
+1. Ele informa o novo destinatário.
+
+2. O sistema identifica automaticamente quem está fazendo o compartilhamento.
+
+3. Cria uma nova entrega vinculada à anterior.
+
+4. Gera uma NOVA cópia protegida exclusiva para o novo destinatário.
+
+5. Essa nova cópia deve possuir um novo copy_id/fingerprint.
+
+6. Registrar a relação:
+
+parent_copy_id
+→ child_copy_id
+
+e:
+
+shared_by
+→ shared_with
+
+7. Registrar data e horário automaticamente no servidor.
+
+Assim cada compartilhamento cria uma nova ramificação rastreável.
+
+==================================================
+8. BANCO DE DADOS PARA CADEIA DE CUSTÓDIA
+==================================================
+
+Analise a estrutura atual antes de criar novas tabelas.
+
+Reutilize delivery_copies, deliveries, delivery_events e clients quando possível.
+
+Se necessário, crie uma migration segura adicionando campos ou uma tabela específica de compartilhamentos.
+
+A estrutura deve conseguir representar:
+
+- protected_file_id;
+- original_owner_id;
+- delivery_id;
+- copy_id;
+- parent_copy_id;
+- shared_by_user_id/client_id;
+- shared_with_client_id;
+- created_at;
+- accessed_at;
+- downloaded_at;
+- revoked_at;
+- status.
+
+Não apague dados existentes.
+
+Não recrie tabelas que já existem.
+
+Não quebre RLS nem políticas de segurança atuais.
+
+==================================================
+9. CADA DESTINATÁRIO DEVE TER UMA CÓPIA ÚNICA
+==================================================
+
+Nunca reutilizar exatamente a mesma cópia protegida para vários destinatários quando o objetivo for rastreamento individual.
+
+Cada destinatário deve receber:
+
+- copy_id exclusivo;
+- fingerprint exclusivo;
+- registro exclusivo no banco;
+- vínculo com o arquivo original;
+- vínculo com quem enviou;
+- vínculo com quem recebeu.
+
+Exemplo:
+
+Original:
+FILE-001
+
+Mellody → Maria:
+COPY-A1
+
+Maria → Ana:
+COPY-B2
+parent = COPY-A1
+
+Ana → João:
+COPY-C3
+parent = COPY-B2
+
+Ao verificar COPY-C3, o sistema deve conseguir reconstruir:
+
+Mellody
+→ Maria
+→ Ana
+→ João
+
+quando todos esses compartilhamentos tiverem ocorrido pelo fluxo controlado do Meell Protect.
+
+==================================================
+10. TELA RASTREAMENTO
+==================================================
+
+Melhorar a tela “Rastreamento” para mostrar uma linha do tempo clara.
+
+Exibir eventos como:
+
+ARQUIVO PROTEGIDO
+20/07/2026 14:20
+
+Mellody criou a proteção.
+
+↓
+
+ENTREGUE
+20/07/2026 14:32
+
+Mellody compartilhou com Maria.
+
+↓
+
+ACESSADO
+20/07/2026 14:40
+
+Maria acessou a entrega.
+
+↓
+
+BAIXADO
+20/07/2026 14:42
+
+Maria baixou a cópia protegida COPY-A1.
+
+↓
+
+RECOMPARTILHADO
+21/07/2026 09:47
+
+Maria compartilhou com Ana.
+
+Nova cópia: COPY-B2.
+
+↓
+
+BAIXADO
+21/07/2026 10:02
+
+Ana baixou COPY-B2.
+
+O proprietário original deve poder acompanhar toda a cadeia autorizada.
+
+==================================================
+11. VERIFICAR ARQUIVO
+==================================================
+
+A função “Verificar Arquivo” deve ser integrada à nova rastreabilidade.
+
+Quando uma cópia protegida for enviada para verificação, tentar identificar:
+
+- se existe proteção válida;
+- arquivo original relacionado;
+- copy_id;
+- proprietário original;
+- destinatário para quem aquela cópia foi gerada;
+- data da geração;
+- entrega relacionada;
+- cadeia de compartilhamentos registrada;
+- status da cópia;
+- se foi revogada, quando aplicável.
+
+Se a cópia encontrada pertencer originalmente a um destinatário específico, mostrar algo como:
+
+“Esta cópia protegida foi originalmente gerada para: Maria.”
+
+Isso ajuda a identificar a origem de uma cópia que apareceu fora do fluxo esperado.
+
+Não afirmar quem realizou um compartilhamento externo sem evidência registrada.
+
+==================================================
+12. SEGURANÇA E PRIVACIDADE
+==================================================
+
+O proprietário só pode rastrear arquivos que pertencem a ele.
+
+Um destinatário não pode visualizar toda a base de clientes ou arquivos de outros criadores.
+
+Não expor:
+
+- service role key;
+- secrets;
+- dados privados;
+- informações de outros usuários.
+
+Todos os eventos críticos devem ser registrados no servidor, não apenas enviados pelo frontend.
+
+Não confiar em nome, data/hora ou identidade enviados livremente pelo navegador.
+
+A identidade de “quem compartilhou” deve ser determinada pela sessão/autenticação ou token seguro da entrega.
+
+Data e horário devem ser gerados no servidor.
+
+==================================================
+13. TESTES OBRIGATÓRIOS DE IMAGENS
+==================================================
+
+Teste separadamente:
+
+- 1 PNG;
+- 1 JPG/JPEG;
+- 1 WEBP.
+
+Para cada formato:
+
+1. Fazer upload.
+2. Baixar Cópia Idêntica.
+3. Confirmar que é o original sem proteção.
+4. Gerar Versão Protegida.
+5. Confirmar que abre normalmente.
+6. Confirmar que não existe corrupção visual.
+7. Confirmar que a proteção/fingerprint foi realmente incorporada.
+8. Enviar a Versão Protegida para “Verificar Arquivo”.
+9. Confirmar que o sistema identifica corretamente a cópia.
+10. Confirmar que o banco possui o registro correspondente.
+
+Não considere o teste aprovado apenas porque o arquivo foi baixado.
+
+==================================================
+14. TESTE OBRIGATÓRIO DE RASTREAMENTO
+==================================================
+
+Simule uma cadeia completa:
+
+Proprietário A
+→ compartilha com Cliente B
+
+Cliente B
+→ usa “Compartilhar com proteção”
+→ compartilha com Cliente C
+
+Cliente C
+→ acessa e baixa.
+
+Confirmar que:
+
+- B recebeu copy_id exclusivo;
+- C recebeu outro copy_id exclusivo;
+- C possui parent_copy_id apontando para a cópia de B;
+- o proprietário A consegue visualizar toda a cadeia;
+- aparecem nome, data e horário dos compartilhamentos;
+- “Verificar Arquivo” identifica corretamente a cópia de B;
+- “Verificar Arquivo” identifica corretamente a cópia de C;
+- a cadeia A → B → C pode ser reconstruída.
+
+==================================================
+15. NÃO ALTERAR OUTRAS ÁREAS
+==================================================
+
+Não alterar desnecessariamente:
+
+- integração Cakto;
+- webhook da Cakto;
+- planos;
+- pagamentos;
+- assinaturas;
+- secrets existentes;
+- autenticação que já funciona;
+- identidade visual;
+- landing page;
+- versão 1.0 Beta;
+- funcionalidades que não tenham relação com proteção/rastreamento.
+
+Faça migrations aditivas e seguras.
+
+Preserve dados existentes.
+
+==================================================
+16. RELATÓRIO FINAL OBRIGATÓRIO
+==================================================
+
+Ao terminar, informe exatamente:
+
+1. Qual era a causa da corrupção do PNG.
+
+2. Por que WEBP estava saindo sem proteção.
+
+3. Quais formatos agora recebem proteção real.
+
+4. Qual técnica de fingerprint foi usada em cada formato.
+
+5. Como confirmou tecnicamente que o fingerprint foi realmente incorporado.
+
+6. Como funciona agora a cadeia de compartilhamentos.
+
+7. Como o sistema identifica quem compartilhou e para quem.
+
+8. Como registra data e horário.
+
+9. Como funciona parent_copy_id → child_copy_id.
+
+10. O que o sistema consegue rastrear dentro do Meell Protect.
+
+11. O que NÃO é tecnicamente possível rastrear fora da plataforma.
+
+12. Resultado real dos testes PNG, JPG/JPEG e WEBP.
+
+13. Resultado do teste:
+Proprietário A → Cliente B → Cliente C.
+
+IMPORTANTE:
+
+Não apenas altere o código e rode npm run build.
+
+Teste efetivamente:
+- geração da proteção;
+- integridade visual;
+- fingerprint;
+- Verificar Arquivo;
+- compartilhamento protegido;
+- rastreamento;
+- cadeia de custódia.
+
+Se alguma funcionalidade não puder ser implementada tecnicamente de forma confiável, informe claramente em vez de simular ou declarar que funciona.

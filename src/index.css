@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  background: linear-gradient(135deg, #ede0ff 0%, #ffd9ef 50%, #e8d5ff 100%);
+  background-attachment: fixed;
+  color: #2a1430;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-meell-500 to-lilas-500 px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:shadow-glow hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-white/70 px-5 py-3 text-sm font-semibold text-meell-700 ring-1 ring-meell-100 backdrop-blur transition hover:bg-white hover:shadow-soft;
+  }
+  .btn-soft {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-lilas-50 px-4 py-2 text-sm font-semibold text-lilas-700 ring-1 ring-lilas-100 transition hover:bg-lilas-100;
+  }
+  .card {
+    @apply rounded-3xl bg-white/90 p-5 shadow-card ring-1 ring-meell-50 backdrop-blur;
+  }
+  .input {
+    @apply w-full rounded-2xl border border-meell-100 bg-white/80 px-4 py-3 text-sm text-meell-900 placeholder:text-meell-300 outline-none transition focus:border-meell-400 focus:ring-4 focus:ring-meell-100;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-meell-400;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+  .section-title {
+    @apply text-2xl font-semibold text-meell-800 sm:text-3xl;
+  }
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: linear-gradient(#f93f8e, #9d63ee); border-radius: 999px; }
+::-webkit-scrollbar-track { background: transparent; }

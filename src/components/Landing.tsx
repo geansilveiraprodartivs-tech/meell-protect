@@ -1,0 +1,336 @@
+import { useEffect, useState } from 'react';
+import {
+  Shield, Lock, FileCheck2, Send, Eye, Download, BarChart3, Check,
+  Sparkles, ChevronDown, Menu, X, ArrowRight, Star, Zap, Clock, UserCheck,
+} from 'lucide-react';
+import Logo from './Logo';
+import { supabase } from '../lib/supabase';
+import type { Plan } from '../lib/types';
+
+interface Props {
+  navigate: (to: string) => void;
+}
+
+const FAQ = [
+  {
+    q: 'O que é o Meell Protect?',
+    a: 'É uma plataforma para criadores, designers e papelarias digitais protegerem arquivos como PDFs, planners e kits, entregando de forma segura e rastreando quem baixou e quando.',
+  },
+  {
+    q: 'Como funciona a entrega segura?',
+    a: 'Você protege o arquivo, cadastra o cliente e cria uma entrega. O cliente recebe um link do Meell Protect, entra ou cria a conta gratuita e baixa o arquivo pela sua "Minha Biblioteca". O link nunca é público e permanente.',
+  },
+  {
+    q: 'Posso limitar downloads ou expirar o acesso?',
+    a: 'Sim. Cada entrega pode ter limite de downloads, data de expiração e revogação manual. Tudo fica registrado no rastreamento.',
+  },
+  {
+    q: 'O cliente final paga algo?',
+    a: 'Não. O cliente final cria uma conta gratuita e acessa a "Minha Biblioteca" com todos os arquivos que recebeu de diferentes criadores.',
+  },
+  {
+    q: 'Como funciona a assinatura?',
+    a: 'A assinatura é mensal e recorrente, estilo Netflix. Há 4 planos: Grátis, Protect Start, Protect Pro (mais popular) e Protect Business. A arquitetura já está preparada para pagamentos recorrentes.',
+  },
+];
+
+const STEPS = [
+  { icon: Shield, title: 'Proteja', desc: 'Faça upload e gere um ID exclusivo Meell Protect com marca d\'água e identificação individual.' },
+  { icon: Send, title: 'Entregue', desc: 'Cadastre o cliente e crie uma entrega segura com limite de downloads e expiração.' },
+  { icon: Lock, title: 'Controle', desc: 'Revogue, renove e acompanhe acessos. O cliente só baixa pela própria conta, nunca por link público.' },
+  { icon: BarChart3, title: 'Rastreie', desc: 'Veja a linha do tempo completa: enviado → protegido → autorizado → acessado → baixado.' },
+];
+
+const BENEFITS = [
+  { icon: FileCheck2, title: 'Proteção por arquivo', desc: 'Cada arquivo recebe um ID Meell Protect e cópias individuais rastreáveis.' },
+  { icon: Eye, title: 'Rastreamento completo', desc: 'Saiba quem acessou, quando baixou e quantas vezes, em tempo real.' },
+  { icon: Download, title: 'Biblioteca do cliente', desc: 'Seus clientes têm uma área gratuita e organizada com tudo que receberam.' },
+  { icon: Clock, title: 'Expiração e limites', desc: 'Defina prazos, limites de download e revogue entregas a qualquer momento.' },
+  { icon: UserCheck, title: 'Entrega autenticada', desc: 'O download só funciona para o cliente autorizado e autenticado no site.' },
+  { icon: Sparkles, title: 'Identidade Meell', desc: 'Visual premium rosa + lilás, parte do ecossistema Agenda Creator Pro.' },
+];
+
+export default function Landing({ navigate }: Props) {
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  useEffect(() => {
+    supabase
+      .from('plans')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .then(({ data }) => {
+        if (data) setPlans(data as Plan[]);
+      });
+  }, []);
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="sticky top-0 z-40 border-b border-meell-100/60 bg-white/70 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
+          <Logo />
+          <nav className="hidden items-center gap-6 text-sm font-medium text-meell-700 md:flex">
+            <a href="#como-funciona" className="hover:text-meell-500 transition">Como funciona</a>
+            <a href="#beneficios" className="hover:text-meell-500 transition">Benefícios</a>
+            <a href="#planos" className="hover:text-meell-500 transition">Planos</a>
+            <a href="#faq" className="hover:text-meell-500 transition">FAQ</a>
+          </nav>
+          <div className="hidden items-center gap-2 md:flex">
+            <button onClick={() => navigate('/login')} className="btn-ghost">Entrar</button>
+            <button onClick={() => navigate('/signup')} className="btn-primary">
+              Começar agora <ArrowRight size={16} />
+            </button>
+          </div>
+          <button
+            className="rounded-xl p-2 text-meell-600 ring-1 ring-meell-100 md:hidden"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-label="Menu"
+          >
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+        {menuOpen && (
+          <div className="border-t border-meell-100 bg-white px-5 py-4 md:hidden">
+            <nav className="flex flex-col gap-3 text-sm font-medium text-meell-700">
+              <a href="#como-funciona" onClick={() => setMenuOpen(false)}>Como funciona</a>
+              <a href="#beneficios" onClick={() => setMenuOpen(false)}>Benefícios</a>
+              <a href="#planos" onClick={() => setMenuOpen(false)}>Planos</a>
+              <a href="#faq" onClick={() => setMenuOpen(false)}>FAQ</a>
+            </nav>
+            <div className="mt-4 flex flex-col gap-2">
+              <button onClick={() => navigate('/login')} className="btn-ghost">Entrar</button>
+              <button onClick={() => navigate('/signup')} className="btn-primary">Começar agora</button>
+            </div>
+          </div>
+        )}
+      </header>
+
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-meell-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute -right-20 top-40 h-80 w-80 rounded-full bg-lilas-200/40 blur-3xl" />
+        <div className="mx-auto max-w-6xl px-5 py-16 sm:py-24">
+          <div className="grid items-center gap-10 lg:grid-cols-2">
+            <div className="animate-fadeUp">
+              <span className="pill bg-lilas-100 text-lilas-700">
+                <Sparkles size={14} /> by Meell · ecossistema Agenda Creator Pro
+              </span>
+              <h1 className="mt-4 text-4xl font-bold leading-tight text-meell-800 sm:text-6xl">
+                MEELL <span className="bg-gradient-to-r from-meell-500 to-lilas-500 bg-clip-text text-transparent">PROTECT</span>
+              </h1>
+              <p className="mt-4 text-lg text-meell-700/80 sm:text-xl">
+                Proteja seus arquivos. Controle suas entregas. Saiba quem recebeu e quando baixou.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button onClick={() => navigate('/signup')} className="btn-primary">
+                  Começar agora <ArrowRight size={16} />
+                </button>
+                <a href="#planos" className="btn-ghost">Ver planos</a>
+              </div>
+              <div className="mt-8 flex items-center gap-5 text-xs text-meell-400">
+                <div className="flex items-center gap-1.5"><Shield size={14} /> Proteção ativa</div>
+                <div className="flex items-center gap-1.5"><Lock size={14} /> Entrega segura</div>
+                <div className="flex items-center gap-1.5"><BarChart3 size={14} /> Rastreamento</div>
+              </div>
+            </div>
+
+            <div className="relative animate-fadeUp">
+              <div className="card mx-auto max-w-md animate-floaty">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-meell-500 to-lilas-500 text-white">
+                    <FileCheck2 size={24} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-meell-800">Agenda Candy 2027.pdf</div>
+                    <div className="text-xs text-meell-400">ID: MP-2026-X7K92A</div>
+                  </div>
+                  <span className="pill ml-auto bg-emerald-50 text-emerald-600">
+                    <Lock size={12} /> Proteção ativa
+                  </span>
+                </div>
+                <div className="mt-4 space-y-2 text-xs text-meell-600">
+                  <Row label="Proprietário" value="Nome do criador" />
+                  <Row label="Protegido em" value="19/07/2026 14:32" />
+                  <Row label="Entregas" value="3 ativas" />
+                  <Row label="Downloads" value="7" />
+                </div>
+                <div className="mt-4 rounded-2xl bg-lilas-50 p-3">
+                  <div className="text-[11px] font-semibold uppercase tracking-wide text-lilas-500">Linha do tempo</div>
+                  <div className="mt-2 flex items-center justify-between text-[10px] text-meell-500">
+                    <span>Enviado</span><span>Protegido</span><span>Autorizado</span><span>Acessado</span><span>Baixado</span>
+                  </div>
+                  <div className="mt-1 h-1.5 rounded-full bg-gradient-to-r from-meell-400 via-lilas-400 to-emerald-400" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="como-funciona" className="mx-auto max-w-6xl px-5 py-16">
+        <div className="text-center">
+          <h2 className="section-title">Como funciona</h2>
+          <p className="mx-auto mt-2 max-w-xl text-meell-600">
+            Quatro passos simples para proteger, entregar, controlar e rastrear seus arquivos digitais.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map((s, i) => (
+            <div key={s.title} className="card group">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-meell-100 to-lilas-100 text-meell-600 transition group-hover:from-meell-500 group-hover:to-lilas-500 group-hover:text-white">
+                <s.icon size={22} />
+              </div>
+              <div className="mt-4 text-xs font-bold uppercase tracking-wide text-meell-300">Passo {i + 1}</div>
+              <div className="mt-1 text-lg font-semibold text-meell-800">{s.title}</div>
+              <p className="mt-1 text-sm text-meell-600">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Benefits */}
+      <section id="beneficios" className="bg-white/60 py-16">
+        <div className="mx-auto max-w-6xl px-5">
+          <div className="text-center">
+            <h2 className="section-title">Por que usar o Meell Protect</h2>
+            <p className="mx-auto mt-2 max-w-xl text-meell-600">
+              Tudo que você precisa para vender arquivos digitais com segurança e profissionalismo.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {BENEFITS.map((b) => (
+              <div key={b.title} className="card">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-lilas-50 text-lilas-600">
+                  <b.icon size={20} />
+                </div>
+                <div className="mt-3 text-base font-semibold text-meell-800">{b.title}</div>
+                <p className="mt-1 text-sm text-meell-600">{b.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Plans */}
+      <section id="planos" className="mx-auto max-w-6xl px-5 py-16">
+        <div className="text-center">
+          <h2 className="section-title">Planos e Preços</h2>
+          <p className="mx-auto mt-2 max-w-xl text-meell-600">
+            Assinatura mensal recorrente, estilo Netflix. Cancele quando quiser.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-5 lg:grid-cols-4">
+          {plans.map((p) => (
+            <div
+              key={p.id}
+              className={`relative flex flex-col rounded-3xl bg-white p-6 shadow-card ring-1 transition ${
+                p.popular ? 'ring-2 ring-meell-400 lg:-translate-y-2' : 'ring-meell-50'
+              }`}
+            >
+              {p.popular && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 pill bg-gradient-to-r from-meell-500 to-lilas-500 text-white">
+                  <Star size={12} /> Mais Popular
+                </span>
+              )}
+              <div className="text-sm font-semibold text-meell-500">{p.name}</div>
+              <div className="mt-2 text-3xl font-bold text-meell-800">{p.price_label}</div>
+              <div className="mt-1 text-xs text-meell-400">{p.tagline}</div>
+              <ul className="mt-5 space-y-2 text-sm text-meell-700">
+                <Feature ok>{p.max_files === 5000 ? 'Arquivos ilimitados' : `${p.max_files} arquivos`}</Feature>
+                <Feature ok>{p.max_storage_mb >= 200000 ? 'Armazenamento ilimitado' : `${p.max_storage_mb} MB de armazenamento`}</Feature>
+                <Feature ok>{p.max_deliveries >= 20000 ? 'Entregas ilimitadas' : `${p.max_deliveries} entregas/mês`}</Feature>
+                <Feature ok={p.watermark}>Marca d'água individual</Feature>
+                <Feature ok={p.advanced_tracking}>Rastreamento avançado</Feature>
+                <Feature ok={p.custom_branding}>Marca personalizada</Feature>
+                <Feature ok={p.priority_support}>Suporte prioritário</Feature>
+              </ul>
+              <button
+                onClick={() => {
+                  if (p.checkout_url) window.open(p.checkout_url, '_blank', 'noopener');
+                  else navigate('/signup');
+                }}
+                className={`mt-6 w-full ${p.popular ? 'btn-primary' : 'btn-ghost'}`}
+              >
+                {p.id === 'free' ? `Começar grátis` : `Assinar ${p.name}`}
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="bg-white/60 py-16">
+        <div className="mx-auto max-w-3xl px-5">
+          <div className="text-center">
+            <h2 className="section-title">Perguntas frequentes</h2>
+          </div>
+          <div className="mt-8 space-y-3">
+            {FAQ.map((item, i) => (
+              <div key={i} className="card">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="flex w-full items-center justify-between text-left"
+                >
+                  <span className="text-sm font-semibold text-meell-800">{item.q}</span>
+                  <ChevronDown
+                    size={18}
+                    className={`text-meell-400 transition ${openFaq === i ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {openFaq === i && <p className="mt-3 text-sm text-meell-600">{item.a}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="mx-auto max-w-6xl px-5 py-16">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-meell-500 to-lilas-500 p-10 text-center text-white shadow-soft sm:p-16">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+          <Zap size={28} className="mx-auto" />
+          <h2 className="mt-4 text-2xl font-bold sm:text-3xl">Pronto para proteger o que você cria?</h2>
+          <p className="mx-auto mt-2 max-w-md text-white/80">
+            Comece grátis agora. Sem cartão de crédito.
+          </p>
+          <button onClick={() => navigate('/signup')} className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-meell-600 shadow-soft transition hover:scale-105">
+            Começar agora <ArrowRight size={16} />
+          </button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-meell-100 bg-white/70 py-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 sm:flex-row">
+          <Logo />
+          <p className="text-xs text-meell-400">
+            © {new Date().getFullYear()} Meell Protect · parte do ecossistema Meell · Agenda Creator Pro
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-meell-400">{label}</span>
+      <span className="font-medium text-meell-700">{value}</span>
+    </div>
+  );
+}
+
+function Feature({ children, ok }: { children: React.ReactNode; ok: boolean }) {
+  return (
+    <li className={`flex items-center gap-2 ${ok ? '' : 'text-meell-300'}`}>
+      <span className={`flex h-4 w-4 items-center justify-center rounded-full ${ok ? 'bg-meell-100 text-meell-600' : 'bg-meell-50 text-meell-300'}`}>
+        {ok ? <Check size={11} /> : <X size={11} />}
+      </span>
+      {children}
+    </li>
+  );
+}
