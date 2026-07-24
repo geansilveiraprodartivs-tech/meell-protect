@@ -252,7 +252,7 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // 2. Validate delivery state
+    // 2. Validate delivery state (revoked/expired checked for both GET and POST)
     if (delivery.revoked) {
       await recordEvent(supabase, delivery.id, "blocked", null, { reason: "revoked" });
       return new Response(JSON.stringify({ error: "Esta entrega foi revogada" }), {
@@ -270,6 +270,15 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // 2b. GET only: return delivery metadata (no download, no limit check)
+    if (req.method === "GET") {
+      return new Response(JSON.stringify({ ok: true, delivery }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // 2c. POST only: check download limit before processing
     if (delivery.download_count >= delivery.download_limit) {
       await recordEvent(supabase, delivery.id, "blocked", null, { reason: "limit_reached" });
       return new Response(JSON.stringify({ error: "Limite de downloads atingido" }), {
