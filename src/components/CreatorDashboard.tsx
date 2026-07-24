@@ -973,7 +973,7 @@ function DeliveriesView({ files, clients, deliveries, onChange, logActivity }: {
     onChange();
   }
 
-  const link = (t: string) => `${window.location.origin}/#/app?token=${t}`;
+  const link = (t: string) => { const base = window.location.pathname.replace(/\/+$/, ''); return `${window.location.origin}${base}/#/app?token=${t}`; };
 
   return (
     <div className="space-y-5">
