@@ -8,12 +8,15 @@
   * {
     @apply border-gray-100;
   }
+  html {
+    @apply overflow-x-hidden;
+  }
   body {
-    @apply bg-gradient-hero text-gray-800 antialiased;
+    @apply bg-gradient-hero text-gray-800 antialiased overflow-x-hidden;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
   #root {
-    @apply min-h-screen;
+    @apply min-h-screen overflow-x-hidden;
   }
 }
 
