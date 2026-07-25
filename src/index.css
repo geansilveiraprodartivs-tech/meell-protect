@@ -163,20 +163,60 @@
    DARK MODE - Complete color inversion
    ============================================ */
 
-/* Background & base text */
+/* --- NUCLEAR: Force ALL text to light in dark mode --- */
+.dark *,
+.dark *::before,
+.dark *::after {
+  color: #e2e8f0 !important;
+}
+
+/* Restore gradient text (pink-lilac headings, section titles, logo) */
+.dark [class*="bg-clip-text"],
+.dark [style*="background-clip: text"],
+.dark [style*="WebkitBackgroundClip"] {
+  background: linear-gradient(135deg, #f472b6 0%, #c084fc 50%, #818cf8 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Restore badge colors */
+.dark .badge-success { color: #6ee7b7 !important; }
+.dark .badge-warning { color: #fcd34d !important; }
+.dark .badge-danger { color: #fca5a5 !important; }
+.dark .badge-info { color: #93c5fd !important; }
+.dark .badge-pink { color: #f9a8d4 !important; }
+
+/* Restore accent/brand colored text */
+.dark .text-pink-500 { color: #ec4899 !important; }
+.dark .text-pink-600 { color: #db2777 !important; }
+.dark .text-pink-700 { color: #be185d !important; }
+.dark .text-purple-500 { color: #a855f7 !important; }
+.dark .text-purple-600 { color: #9333ea !important; }
+.dark .text-indigo-500 { color: #6366f1 !important; }
+.dark .text-red-500 { color: #ef4444 !important; }
+.dark .text-red-600 { color: #dc2626 !important; }
+.dark .text-green-500 { color: #22c55e !important; }
+.dark .text-green-600 { color: #16a34a !important; }
+.dark .text-yellow-500 { color: #eab308 !important; }
+.dark .text-blue-500 { color: #3b82f6 !important; }
+.dark .text-blue-600 { color: #2563eb !important; }
+.dark .text-orange-500 { color: #f97316 !important; }
+.dark .text-emerald-500 { color: #10b981 !important; }
+
+/* --- Background & base --- */
 .dark body,
 .dark #root {
   background: linear-gradient(160deg, #0c0512 0%, #0a0814 30%, #08080f 60%, #050510 100%) !important;
   color: #e2e8f0 !important;
 }
 
-/* All cards, glass elements, panels */
+/* Cards, glass elements, panels */
 .dark .card,
 .dark .card-gradient,
 .dark .glass {
   background: rgba(30, 20, 40, 0.8) !important;
   border-color: rgba(100, 70, 130, 0.3) !important;
-  color: #e2e8f0 !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -187,28 +227,16 @@
 .dark select {
   background: rgba(30, 20, 40, 0.6) !important;
   border-color: rgba(100, 70, 130, 0.3) !important;
-  color: #e2e8f0 !important;
 }
 .dark .input::placeholder,
 .dark input::placeholder {
   color: #64748b !important;
 }
 
-/* All text elements */
-.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
-.dark p, .dark span, .dark label, .dark td, .dark th,
-.dark li, .dark a, .dark div {
-  color: inherit;
-}
-
-.dark h1, .dark h2, .dark h3 {
-  color: #f1f5f9 !important;
-}
+/* Placeholder restore */
+.dark ::placeholder { color: #64748b !important; }
 
 /* Tables */
-.dark table {
-  color: #cbd5e1 !important;
-}
 .dark thead {
   background: rgba(30, 20, 40, 0.5) !important;
 }
@@ -220,47 +248,22 @@
 }
 
 /* Buttons */
-.dark .btn-primary {
-  opacity: 0.9;
-}
+.dark .btn-primary { opacity: 0.9; }
 .dark .btn-secondary {
   background: rgba(30, 20, 40, 0.6) !important;
   border-color: rgba(100, 70, 130, 0.3) !important;
-  color: #e2e8f0 !important;
 }
 .dark .btn-secondary:hover {
   background: rgba(50, 30, 60, 0.8) !important;
 }
-.dark .btn-ghost {
-  color: #94a3b8 !important;
-}
 .dark .btn-ghost:hover {
   background: rgba(100, 70, 130, 0.15) !important;
-  color: #e2e8f0 !important;
 }
 .dark .btn-danger {
   background: #b91c1c !important;
 }
 
-/* Badges */
-.dark .badge-success {
-  background: rgba(6, 78, 59, 0.3) !important;
-  color: #6ee7b7 !important;
-}
-.dark .badge-warning {
-  background: rgba(120, 53, 15, 0.3) !important;
-  color: #fcd34d !important;
-}
-.dark .badge-danger {
-  background: rgba(127, 29, 29, 0.3) !important;
-  color: #fca5a5 !important;
-}
-.dark .badge-info {
-  background: rgba(30, 58, 138, 0.3) !important;
-  color: #93c5fd !important;
-}
-
-/* Labels */
+/* Labels - slightly dimmer */
 .dark .label {
   color: #94a3b8 !important;
 }
@@ -280,10 +283,10 @@
 
 /* Links */
 .dark a {
-  color: #c084fc;
+  color: #c084fc !important;
 }
 .dark a:hover {
-  color: #e879f9;
+  color: #e879f9 !important;
 }
 
 /* Scrollbar */
@@ -297,11 +300,6 @@
   background: rgba(0, 0, 0, 0.6) !important;
 }
 
-/* Progress bars */
-.dark [class*="bg-pink-"] {
-  filter: brightness(0.8);
-}
-
 /* Sidebar */
 .dark [class*="bg-gradient-sidebar"] {
   filter: brightness(0.7);
@@ -312,11 +310,6 @@
 .dark [class*="sticky"] {
   background: rgba(15, 10, 25, 0.9) !important;
   border-color: rgba(100, 70, 130, 0.2) !important;
-}
-
-/* Empty states */
-.dark [class*="opacity-40"] {
-  opacity: 0.3 !important;
 }
 
 /* Dropdown menus, popovers */
@@ -346,19 +339,4 @@
 .dark [class*="fixed bottom-0"] {
   background: rgba(15, 10, 25, 0.95) !important;
   border-color: rgba(100, 70, 130, 0.3) !important;
-}
-
-/* MeellChat */
-.dark [class*="bg-gradient-to-b"] {
-  filter: brightness(0.7);
-}
-
-/* Spinner */
-.dark .text-pink-500 {
-  color: #f472b6 !important;
-}
-
-/* Ensure gradient text stays visible */
-.dark [class*="bg-clip-text"] {
-  filter: brightness(1.2);
 }
