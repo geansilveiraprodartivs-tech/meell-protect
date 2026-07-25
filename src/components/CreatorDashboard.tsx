@@ -84,25 +84,25 @@ export default function CreatorDashboard({ navigate }: { navigate: (to: string) 
   const isCreator = profile.account_type === 'creator';
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gradient-hero">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-72 transform border-r border-meell-100 bg-white/80 backdrop-blur transition-transform lg:static lg:translate-x-0 dark:border-slate-700 dark:bg-slate-900/80 ${
+        className={`fixed inset-y-0 left-0 z-40 w-72 transform bg-gradient-sidebar backdrop-blur-xl border-r border-pink-100/50 dark:border-pink-900/20 transition-transform lg:static lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between px-5 py-4">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-pink-100/30">
             <Logo size={32} />
             <button className="lg:hidden" onClick={() => setSidebarOpen(false)}>
-              <X size={20} className="text-meell-400" />
+              <X size={20} className="text-pink-300 hover:text-pink-500 transition" />
             </button>
           </div>
           <div className="px-5 py-3">
-            <div className="rounded-2xl bg-gradient-to-r from-meell-50 to-lilas-50 p-3 ring-1 ring-meell-100">
-              <div className="text-[11px] font-semibold uppercase tracking-wide text-meell-400">Plano atual</div>
-              <div className="mt-0.5 flex items-center gap-2 text-sm font-bold text-meell-700">
-                <Sparkles size={14} /> {plan?.name ?? 'Grátis'}
+            <div className="glass rounded-2xl p-3 shadow-card">
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-pink-400">Plano atual</div>
+              <div className="mt-0.5 flex items-center gap-2 text-sm font-bold text-meell-700 dark:text-slate-200">
+                <Sparkles size={14} className="text-pink-500" /> {plan?.name ?? 'Grátis'}
               </div>
             </div>
           </div>
@@ -116,8 +116,8 @@ export default function CreatorDashboard({ navigate }: { navigate: (to: string) 
                 }}
                 className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition ${
                   view === n.id
-                    ? 'bg-gradient-to-r from-meell-500 to-lilas-500 text-white shadow-soft'
-                    : 'text-meell-700 hover:bg-meell-50 dark:text-slate-300 dark:hover:bg-slate-800'
+                    ? 'sidebar-link-active'
+                    : 'sidebar-link'
                 }`}
               >
                 <n.icon size={18} />
@@ -125,13 +125,13 @@ export default function CreatorDashboard({ navigate }: { navigate: (to: string) 
               </button>
             ))}
           </nav>
-          <div className="border-t border-meell-100 p-3">
+          <div className="border-t border-pink-100/30 p-3">
             <button
               onClick={async () => {
                 await signOut();
                 navigate('/');
               }}
-              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-meell-500 hover:bg-meell-50"
+              className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-pink-400 hover:bg-pink-50/50 dark:hover:bg-pink-900/20 transition"
             >
               <LogOut size={18} /> Sair
             </button>
@@ -140,25 +140,25 @@ export default function CreatorDashboard({ navigate }: { navigate: (to: string) 
       </aside>
 
       {sidebarOpen && (
-        <div className="fixed inset-0 z-30 bg-meell-900/20 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 z-30 bg-black/20 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Main */}
       <main className="flex-1 lg:pl-0">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-meell-100 bg-white/70 px-5 py-3 backdrop-blur lg:px-8 dark:border-slate-700 dark:bg-slate-900/70">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-pink-100 dark:border-pink-900/30 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl px-5 py-3 lg:px-8">
           <div className="flex items-center gap-3">
             <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
               <Menu size={22} className="text-meell-600 dark:text-slate-300" />
             </button>
             <div>
-              <div className="text-xs text-meell-400 dark:text-slate-500">Olá,</div>
+              <div className="text-xs text-pink-400">Olá,</div>
               <div className="text-sm font-semibold text-meell-800 dark:text-slate-100">
                 {profile.display_name || profile.email}
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="pill bg-lilas-50 text-lilas-700">
+            <span className="pill bg-gradient-primary/10 text-pink-600 dark:text-pink-400">
               <Shield size={12} /> {isCreator ? 'Criador' : 'Cliente'}
             </span>
           </div>
@@ -218,10 +218,10 @@ function DashboardView({
   const storageUsed = files.reduce((s, f) => s + (f.file_size || 0), 0);
   const storageMB = storageUsed / (1024 * 1024);
   const stats = [
-    { label: 'Arquivos protegidos', value: files.length, icon: FileCheck2, color: 'from-meell-500 to-meell-400' },
-    { label: 'Clientes', value: clients.length, icon: Users, color: 'from-lilas-500 to-lilas-400' },
-    { label: 'Entregas', value: deliveries.length, icon: Send, color: 'from-meell-400 to-lilas-400' },
-    { label: 'Downloads', value: totalDownloads, icon: Download, color: 'from-lilas-400 to-meell-400' },
+    { label: 'Arquivos protegidos', value: files.length, icon: FileCheck2, color: 'from-pink-500 to-pink-400' },
+    { label: 'Clientes', value: clients.length, icon: Users, color: 'from-violet-500 to-violet-400' },
+    { label: 'Entregas', value: deliveries.length, icon: Send, color: 'from-pink-400 to-violet-400' },
+    { label: 'Downloads', value: totalDownloads, icon: Download, color: 'from-violet-400 to-pink-500' },
   ];
   const limits = [
     { label: 'Arquivos', used: files.length, max: plan?.max_files ?? 5 },
@@ -232,18 +232,18 @@ function DashboardView({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-meell-800 dark:text-slate-100">Dashboard</h1>
+        <h1 className="section-title">Dashboard</h1>
         <p className="text-sm text-meell-500 dark:text-slate-400">Visão geral do seu Meell Protect.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
           <div key={s.label} className="card">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br ${s.color} text-white`}>
+            <div className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br ${s.color} text-white shadow-glow`}>
               <s.icon size={20} />
             </div>
             <div className="mt-3 text-2xl font-bold text-meell-800">{s.value}</div>
-            <div className="text-xs text-meell-400">{s.label}</div>
+            <div className="text-xs text-pink-400">{s.label}</div>
           </div>
         ))}
       </div>
@@ -252,7 +252,7 @@ function DashboardView({
         <div className="card lg:col-span-2">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-meell-800">Uso do plano</h2>
-            <button onClick={() => setView('plan')} className="text-xs font-semibold text-meell-500 hover:text-meell-700">
+            <button onClick={() => setView('plan')} className="text-xs font-semibold text-pink-500 hover:text-pink-600 transition">
               Ver planos
             </button>
           </div>
@@ -265,9 +265,9 @@ function DashboardView({
                     <span>{l.label}</span>
                     <span>{l.used} / {l.max}</span>
                   </div>
-                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-meell-50">
+                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-pink-50 dark:bg-pink-900/20">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-meell-500 to-lilas-500"
+                      className="h-full rounded-full bg-gradient-primary"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -280,14 +280,14 @@ function DashboardView({
         <div className="card">
           <h2 className="font-semibold text-meell-800">Atividades recentes</h2>
           <div className="mt-3 space-y-3">
-            {activity.length === 0 && <p className="text-xs text-meell-400">Nenhuma atividade ainda.</p>}
+            {activity.length === 0 && <p className="text-xs text-pink-400">Nenhuma atividade ainda.</p>}
             {activity.slice(0, 6).map((a) => (
               <div key={a.id} className="flex items-start gap-2 text-xs">
-                <div className="mt-1 h-2 w-2 rounded-full bg-meell-400" />
+                <div className="mt-1 h-2 w-2 rounded-full bg-pink-400" />
                 <div>
                   <div className="font-medium text-meell-700">{a.event}</div>
-                  {a.description && <div className="text-meell-400">{a.description}</div>}
-                  <div className="text-meell-300">{timeAgo(a.created_at)}</div>
+                  {a.description && <div className="text-pink-400">{a.description}</div>}
+                  <div className="text-pink-300">{timeAgo(a.created_at)}</div>
                 </div>
               </div>
             ))}
@@ -298,13 +298,13 @@ function DashboardView({
       <div className="card">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-meell-800">Entregas recentes</h2>
-          <button onClick={() => setView('deliveries')} className="text-xs font-semibold text-meell-500 hover:text-meell-700">
+          <button onClick={() => setView('deliveries')} className="text-xs font-semibold text-pink-500 hover:text-pink-600 transition">
             Ver todas
           </button>
         </div>
         <div className="mt-3 overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="text-xs uppercase text-meell-400">
+            <thead className="text-xs uppercase text-pink-400">
               <tr>
                 <th className="py-2">Arquivo</th>
                 <th className="py-2">Cliente</th>
@@ -315,24 +315,24 @@ function DashboardView({
             </thead>
             <tbody>
               {deliveries.slice(0, 5).map((d) => (
-                <tr key={d.id} className="border-t border-meell-50">
+                <tr key={d.id} className="border-t border-pink-50 dark:border-pink-900/20 hover:bg-pink-50/30 dark:hover:bg-pink-900/10 transition">
                   <td className="py-2.5">{d.file?.title ?? '—'}</td>
                   <td className="py-2.5">{d.client?.name ?? '—'}</td>
                   <td className="py-2.5">{d.download_count}/{d.download_limit}</td>
                   <td className="py-2.5">
                     {d.revoked ? (
-                      <span className="pill bg-rose-50 text-rose-600">Revogada</span>
+                      <span className="pill badge-danger">Revogada</span>
                     ) : d.expires_at && new Date(d.expires_at) < new Date() ? (
-                      <span className="pill bg-amber-50 text-amber-600">Expirada</span>
+                      <span className="pill badge-warning">Expirada</span>
                     ) : (
-                      <span className="pill bg-emerald-50 text-emerald-600">Ativa</span>
+                      <span className="pill badge-success">Ativa</span>
                     )}
                   </td>
-                  <td className="py-2.5 text-meell-400">{timeAgo(d.created_at)}</td>
+                  <td className="py-2.5 text-pink-400">{timeAgo(d.created_at)}</td>
                 </tr>
               ))}
               {deliveries.length === 0 && (
-                <tr><td colSpan={5} className="py-6 text-center text-meell-400">Nenhuma entrega ainda.</td></tr>
+                <tr><td colSpan={5} className="py-6 text-center text-pink-400">Nenhuma entrega ainda.</td></tr>
               )}
             </tbody>
           </table>
@@ -486,7 +486,7 @@ function ProtectView({ onDone, logActivity, plan, files }: { onDone: () => void;
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-meell-800">Proteger novo arquivo</h1>
+      <h1 className="section-title">Proteger novo arquivo</h1>
       <p className="text-sm text-meell-500">Gere um ID exclusivo Meell Protect e registre seu arquivo.</p>
 
       <form onSubmit={submit} className="mt-6 space-y-4 card">
@@ -501,8 +501,8 @@ function ProtectView({ onDone, logActivity, plan, files }: { onDone: () => void;
                 onClick={() => { setUploadMode(m.id); setFileList([]); }}
                 className={`flex-1 rounded-2xl px-3 py-2 text-xs font-medium ring-1 transition ${
                   uploadMode === m.id
-                    ? 'bg-meell-500 text-white ring-meell-500'
-                    : 'bg-white text-meell-600 ring-meell-100 hover:bg-meell-50'
+                    ? 'bg-gradient-primary text-white ring-pink-500 shadow-glow'
+                    : 'bg-white dark:bg-slate-800 text-meell-600 ring-pink-100 dark:ring-pink-900/30 hover:bg-pink-50 dark:hover:bg-pink-900/20'
                 }`}
               >
                 {m.label}
@@ -517,14 +517,14 @@ function ProtectView({ onDone, logActivity, plan, files }: { onDone: () => void;
             {uploadMode === 'single' ? 'Arquivo (PDF, imagem, zip...)' : uploadMode === 'multiple' ? 'Arquivos' : 'Pasta'}
           </label>
           {uploadMode === 'folder' ? (
-            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-meell-200 bg-meell-50/50 px-4 py-8 text-center transition hover:border-meell-400 hover:bg-meell-50">
-              <ShieldPlus size={28} className="text-meell-400" />
+            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-pink-200 dark:border-pink-800 bg-pink-50/30 dark:bg-pink-900/10 px-4 py-8 text-center transition hover:border-pink-400 hover:bg-pink-50/50">
+              <ShieldPlus size={28} className="text-pink-400" />
               <div className="text-sm font-medium text-meell-700">
                 {fileList.length > 0
                   ? `${fileList.length} arquivo(s) selecionado(s) · ${formatBytes(totalSize)}`
                   : 'Clique para escolher uma pasta'}
               </div>
-              <div className="text-xs text-meell-400">A estrutura de subpastas será preservada</div>
+              <div className="text-xs text-pink-400">A estrutura de subpastas será preservada</div>
               <input
                 ref={folderInputRef}
                 type="file"
@@ -533,8 +533,8 @@ function ProtectView({ onDone, logActivity, plan, files }: { onDone: () => void;
               />
             </label>
           ) : (
-            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-meell-200 bg-meell-50/50 px-4 py-8 text-center transition hover:border-meell-400 hover:bg-meell-50">
-              <ShieldPlus size={28} className="text-meell-400" />
+            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-pink-200 dark:border-pink-800 bg-pink-50/30 dark:bg-pink-900/10 px-4 py-8 text-center transition hover:border-pink-400 hover:bg-pink-50/50">
+              <ShieldPlus size={28} className="text-pink-400" />
               <div className="text-sm font-medium text-meell-700">
                 {fileList.length > 0
                   ? uploadMode === 'single'
@@ -557,18 +557,18 @@ function ProtectView({ onDone, logActivity, plan, files }: { onDone: () => void;
 
           {/* File list preview for multiple/folder */}
           {fileList.length > 1 && (
-            <div className="mt-2 max-h-32 overflow-y-auto rounded-2xl bg-meell-50 p-2">
+            <div className="mt-2 max-h-32 overflow-y-auto rounded-2xl bg-pink-50/50 dark:bg-pink-900/15 p-2">
               {fileList.slice(0, 20).map((f, i) => {
                 const rel = (f as File & { webkitRelativePath?: string }).webkitRelativePath || f.name;
                 return (
                   <div key={i} className="flex items-center justify-between py-0.5 text-xs text-meell-600">
                     <span className="truncate">{rel}</span>
-                    <span className="ml-2 shrink-0 text-meell-400">{formatBytes(f.size)}</span>
+                    <span className="ml-2 shrink-0 text-pink-400">{formatBytes(f.size)}</span>
                   </div>
                 );
               })}
               {fileList.length > 20 && (
-                <div className="py-0.5 text-xs text-meell-400">... e mais {fileList.length - 20} arquivo(s)</div>
+                <div className="py-0.5 text-xs text-pink-400">... e mais {fileList.length - 20} arquivo(s)</div>
               )}
             </div>
           )}
@@ -583,9 +583,9 @@ function ProtectView({ onDone, logActivity, plan, files }: { onDone: () => void;
         )}
 
         {plan?.watermark && (
-          <div className="rounded-2xl bg-lilas-50 p-4 ring-1 ring-lilas-100">
-            <label className="flex items-center gap-2 text-sm font-medium text-lilas-700">
-              <input type="checkbox" checked={watermark} onChange={(e) => setWatermark(e.target.checked)} className="rounded accent-lilas-500" />
+          <div className="rounded-2xl bg-violet-50 dark:bg-violet-900/20 p-4 ring-1 ring-violet-100 dark:ring-violet-800">
+            <label className="flex items-center gap-2 text-sm font-medium text-violet-700 dark:text-violet-300">
+              <input type="checkbox" checked={watermark} onChange={(e) => setWatermark(e.target.checked)} className="rounded accent-violet-500" />
               Aplicar marca d'água
             </label>
             {watermark && (
@@ -600,9 +600,9 @@ function ProtectView({ onDone, logActivity, plan, files }: { onDone: () => void;
               <span>{progressLabel || 'Enviando e protegendo...'}</span>
               <span>{progress}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-meell-100">
+            <div className="h-2 overflow-hidden rounded-full bg-pink-100 dark:bg-pink-900/30">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-meell-500 to-lilas-500 transition-all"
+                className="h-full rounded-full bg-gradient-primary transition-all"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -715,11 +715,11 @@ function FilesView({ files, plan, onChange, logActivity }: {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-meell-800">Meus arquivos</h1>
+          <h1 className="section-title">Meus arquivos</h1>
           <p className="text-sm text-meell-500">{files.length} arquivo(s) protegido(s) · {plan?.name}</p>
         </div>
         <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-meell-300" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300" />
           <input className="input pl-9" placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
@@ -728,24 +728,24 @@ function FilesView({ files, plan, onChange, logActivity }: {
         {filtered.map((f) => (
           <div key={f.id} className="card">
             <div className="flex items-start gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-meell-100 to-lilas-100 text-2xl">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary/10 text-2xl">
                 {fileEmoji(f.mime_type)}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-semibold text-meell-800">{f.title}</div>
-                <div className="text-xs text-meell-400">{f.meell_id}</div>
+                <div className="text-xs text-pink-400">{f.meell_id}</div>
               </div>
               {f.status === 'protected' ? (
-                <span className="pill bg-emerald-50 text-emerald-600"><Lock size={11} /> Ativa</span>
+                <span className="pill badge-success"><Lock size={11} /> Ativa</span>
               ) : (
-                <span className="pill bg-rose-50 text-rose-600"><AlertCircle size={11} /> Revogado</span>
+                <span className="pill badge-danger"><AlertCircle size={11} /> Revogado</span>
               )}
             </div>
             <div className="mt-3 space-y-1 text-xs text-meell-500">
               <div className="flex justify-between"><span>Tamanho</span><span>{formatBytes(f.file_size)}</span></div>
               <div className="flex justify-between"><span>Downloads</span><span>{f.downloads_count}</span></div>
               <div className="flex justify-between"><span>Protegido em</span><span>{formatDate(f.created_at)}</span></div>
-              {f.watermark && <div className="flex justify-between"><span>Marca d'água</span><span className="text-lilas-600">{f.watermark_text || 'Ativa'}</span></div>}
+              {f.watermark && <div className="flex justify-between"><span>Marca d'água</span><span className="text-violet-600 dark:text-violet-400">{f.watermark_text || 'Ativa'}</span></div>}
             </div>
             <div className="mt-4 space-y-2">
               <div className="flex gap-2">
@@ -755,11 +755,11 @@ function FilesView({ files, plan, onChange, logActivity }: {
                     setCopied(f.id);
                     setTimeout(() => setCopied(null), 1500);
                   }}
-                  className="btn-soft flex-1"
+                  className="btn-ghost flex-1"
                 >
                   {copied === f.id ? <Check size={14} /> : <Copy size={14} />} ID
                 </button>
-                <button onClick={() => setConfirm(f)} className="rounded-2xl bg-rose-50 p-2 text-rose-500 ring-1 ring-rose-100 hover:bg-rose-100">
+                <button onClick={() => setConfirm(f)} className="rounded-2xl bg-rose-50 dark:bg-rose-900/30 p-2 text-rose-500 ring-1 ring-rose-100 dark:ring-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition">
                   <Trash2 size={16} />
                 </button>
               </div>
@@ -768,7 +768,7 @@ function FilesView({ files, plan, onChange, logActivity }: {
                   onClick={() => downloadIdentical(f)}
                   disabled={downloading === f.id}
                   title="Baixar cópia idêntica (arquivo original, sem proteção)"
-                  className="flex flex-1 items-center justify-center gap-1 rounded-2xl bg-meell-50 py-2 text-xs font-medium text-meell-600 ring-1 ring-meell-100 hover:bg-meell-100 disabled:opacity-50"
+                  className="flex flex-1 items-center justify-center gap-1 rounded-2xl bg-pink-50 dark:bg-pink-900/20 py-2 text-xs font-medium text-pink-600 dark:text-pink-400 ring-1 ring-pink-100 dark:ring-pink-800 hover:bg-pink-100 dark:hover:bg-pink-900/30 disabled:opacity-50 transition"
                 >
                   {downloading === f.id ? <RefreshCw size={13} className="animate-spin" /> : <Download size={13} />}
                   Cópia Idêntica
@@ -777,7 +777,7 @@ function FilesView({ files, plan, onChange, logActivity }: {
                   onClick={() => downloadProtected(f)}
                   disabled={downloadingProtected === f.id}
                   title="Baixar versão protegida (fingerprint + marca d'água)"
-                  className="flex flex-1 items-center justify-center gap-1 rounded-2xl bg-lilas-50 py-2 text-xs font-medium text-lilas-700 ring-1 ring-lilas-100 hover:bg-lilas-100 disabled:opacity-50"
+                  className="flex flex-1 items-center justify-center gap-1 rounded-2xl bg-violet-50 dark:bg-violet-900/20 py-2 text-xs font-medium text-violet-700 dark:text-violet-400 ring-1 ring-violet-100 dark:ring-violet-800 hover:bg-violet-100 dark:hover:bg-violet-900/30 disabled:opacity-50 transition"
                 >
                   {downloadingProtected === f.id ? <RefreshCw size={13} className="animate-spin" /> : <ShieldCheck size={13} />}
                   Versão Protegida
@@ -787,8 +787,10 @@ function FilesView({ files, plan, onChange, logActivity }: {
           </div>
         ))}
         {filtered.length === 0 && (
-          <div className="card col-span-full py-12 text-center text-meell-400 dark:text-slate-500">
-            <FileX size={40} className="mx-auto mb-3 opacity-40" />
+          <div className="card col-span-full py-12 text-center text-pink-400 dark:text-pink-500">
+            <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-3xl bg-gradient-primary/10 mb-3">
+              <FileX size={40} className="text-pink-300" />
+            </div>
             <p className="font-medium">{search ? 'Nenhum arquivo encontrado.' : 'Nenhum arquivo protegido ainda.'}</p>
             {!search && <p className="mt-1 text-xs">Faça upload do seu primeiro arquivo para começar a proteger seus conteúdos.</p>}
           </div>
@@ -802,10 +804,10 @@ function FilesView({ files, plan, onChange, logActivity }: {
               <strong>{confirm.title}</strong> ({confirm.meell_id})
             </p>
             <div className="flex flex-col gap-2">
-              <button onClick={() => revoke(confirm)} className="btn-soft">
+              <button onClick={() => revoke(confirm)} className="btn-ghost">
                 <Lock size={14} /> Revogar proteção
               </button>
-              <button onClick={() => remove(confirm)} className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600 ring-1 ring-rose-100 hover:bg-rose-100">
+              <button onClick={() => remove(confirm)} className="rounded-2xl bg-rose-50 dark:bg-rose-900/30 px-4 py-3 text-sm font-semibold text-rose-600 ring-1 ring-rose-100 dark:ring-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/50">
                 <Trash2 size={14} /> Excluir permanentemente
               </button>
             </div>
@@ -860,12 +862,12 @@ function ClientsView({ clients, deliveries, onChange, logActivity }: {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-meell-800 dark:text-slate-100">Meus clientes</h1>
+          <h1 className="section-title">Meus clientes</h1>
           <p className="text-sm text-meell-500 dark:text-slate-400">{clients.length} cliente(s) cadastrado(s)</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-meell-300 dark:text-slate-500" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300 dark:text-slate-500" />
             <input className="input pl-9" placeholder="Buscar cliente..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <button onClick={() => setOpen(true)} className="btn-primary"><Plus size={16} /> Novo cliente</button>
@@ -878,7 +880,7 @@ function ClientsView({ clients, deliveries, onChange, logActivity }: {
           return (
             <div key={c.id} className="card">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-meell-500 to-lilas-500 text-sm font-bold text-white">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-primary text-sm font-bold text-white shadow-glow">
                   {c.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -898,8 +900,10 @@ function ClientsView({ clients, deliveries, onChange, logActivity }: {
           );
         })}
         {filtered.length === 0 && (
-          <div className="card col-span-full py-12 text-center text-meell-400 dark:text-slate-500">
-            <UserX size={40} className="mx-auto mb-3 opacity-40" />
+          <div className="card col-span-full py-12 text-center text-pink-400 dark:text-pink-500">
+            <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-3xl bg-gradient-primary/10 mb-3">
+              <UserX size={40} className="text-pink-300" />
+            </div>
             <p className="font-medium">{search ? 'Nenhum cliente encontrado.' : 'Nenhum cliente cadastrado ainda.'}</p>
             {!search && <p className="mt-1 text-xs">Cadastre seu primeiro cliente para começar a enviar entregas seguras.</p>}
           </div>
@@ -1031,12 +1035,12 @@ function DeliveriesView({ files, clients, deliveries, onChange, logActivity }: {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-meell-800 dark:text-slate-100">Entregas</h1>
+          <h1 className="section-title">Entregas</h1>
           <p className="text-sm text-meell-500 dark:text-slate-400">{deliveries.length} entrega(s) · links seguros</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-meell-300 dark:text-slate-500" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300 dark:text-slate-500" />
             <input className="input pl-9" placeholder="Buscar entrega..." value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <button onClick={() => setOpen(true)} className="btn-primary" disabled={files.length === 0 || clients.length === 0}>
@@ -1046,7 +1050,7 @@ function DeliveriesView({ files, clients, deliveries, onChange, logActivity }: {
       </div>
 
       {files.length === 0 || clients.length === 0 ? (
-        <div className="card py-8 text-center text-sm text-meell-400">
+        <div className="card py-8 text-center text-sm text-pink-400">
           Você precisa cadastrar ao menos um arquivo protegido e um cliente antes de criar entregas.
         </div>
       ) : (
@@ -1055,10 +1059,10 @@ function DeliveriesView({ files, clients, deliveries, onChange, logActivity }: {
             const expired = d.expires_at && new Date(d.expires_at) < new Date();
             const status = d.revoked ? 'Revogada' : expired ? 'Expirada' : 'Ativa';
             const statusStyle = d.revoked
-              ? 'bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'
+              ? 'badge-danger'
               : expired
-              ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
-              : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400';
+              ? 'badge-warning'
+              : 'badge-success';
             return (
               <div key={d.id} className="card">
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -1084,11 +1088,11 @@ function DeliveriesView({ files, clients, deliveries, onChange, logActivity }: {
                       toast('Link copiado!', 'success');
                       setTimeout(() => setCopied(null), 1500);
                     }}
-                    className="btn-soft"
+                    className="btn-ghost"
                   >
                     {copied === d.id ? <Check size={14} /> : <Copy size={14} />} Copiar link
                   </button>
-                  <button onClick={() => setConfirmRevoke(d)} className="btn-soft">
+                  <button onClick={() => setConfirmRevoke(d)} className="btn-ghost">
                     <RefreshCw size={14} /> {d.revoked ? 'Reativar' : 'Revogar'}
                   </button>
                 </div>
@@ -1096,8 +1100,10 @@ function DeliveriesView({ files, clients, deliveries, onChange, logActivity }: {
             );
           })}
           {filtered.length === 0 && (
-            <div className="card py-12 text-center text-meell-400 dark:text-slate-500">
-              <Send size={40} className="mx-auto mb-3 opacity-40" />
+            <div className="card py-12 text-center text-pink-400 dark:text-pink-500">
+              <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-3xl bg-gradient-primary/10 mb-3">
+                <Send size={40} className="text-pink-300" />
+              </div>
               <p className="font-medium">{search ? 'Nenhuma entrega encontrada.' : 'Nenhuma entrega criada ainda.'}</p>
               {!search && <p className="mt-1 text-xs">Crie uma entrega segura para compartilhar arquivos protegidos com seus clientes.</p>}
             </div>
@@ -1153,7 +1159,7 @@ function DeliveriesView({ files, clients, deliveries, onChange, logActivity }: {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-meell-50 p-3 ring-1 ring-meell-100">
+          <div className="rounded-2xl bg-pink-50/50 dark:bg-pink-900/15 p-3 ring-1 ring-pink-100 dark:ring-pink-900/30">
             <div className="text-sm font-semibold text-meell-800">Proteção da cópia</div>
             <p className="mt-1 text-xs text-meell-500">
               O arquivo original permanece privado. O Meell Protect pode gerar uma cópia identificada exclusivamente para esta entrega, facilitando o rastreamento em caso de compartilhamento indevido.
@@ -1173,7 +1179,7 @@ function DeliveriesView({ files, clients, deliveries, onChange, logActivity }: {
               </label>
             </div>
             {protectionMode === 'watermark' && (
-              <div className="mt-3 space-y-2 border-t border-meell-100 pt-3">
+              <div className="mt-3 space-y-2 border-t border-pink-100 dark:border-pink-900/30 pt-3">
                 <div className="text-xs font-medium text-meell-600">Dados a exibir na marca d'água:</div>
                 <label className="flex items-center gap-2 text-xs text-meell-700">
                   <input type="checkbox" checked={wmClientName} onChange={(e) => setWmClientName(e.target.checked)} />
@@ -1232,7 +1238,7 @@ function TrackingView({ deliveries }: { deliveries: DeliveryWithRelations[] }) {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-meell-800 dark:text-slate-100">Rastreamento e histórico</h1>
+          <h1 className="section-title">Rastreamento e histórico</h1>
           <p className="text-sm text-meell-500 dark:text-slate-400">Linha do tempo completa de cada entrega.</p>
         </div>
         <div className="relative">
@@ -1247,7 +1253,7 @@ function TrackingView({ deliveries }: { deliveries: DeliveryWithRelations[] }) {
             <button
               key={d.id}
               onClick={() => loadEvents(d)}
-              className={`card w-full text-left transition ${selected?.id === d.id ? 'ring-2 ring-meell-300 dark:ring-lilas-500' : ''}`}
+              className={`card w-full text-left transition ${selected?.id === d.id ? 'ring-2 ring-pink-400 dark:ring-pink-600 shadow-glow' : ''}`}
             >
               <div className="flex items-center justify-between">
                 <div className="text-sm font-semibold text-meell-800 dark:text-slate-100">{d.file?.title}</div>
@@ -1257,8 +1263,10 @@ function TrackingView({ deliveries }: { deliveries: DeliveryWithRelations[] }) {
             </button>
           ))}
           {filtered.length === 0 && (
-            <div className="card py-12 text-center text-meell-400 dark:text-slate-500">
-              <History size={40} className="mx-auto mb-3 opacity-40" />
+            <div className="card py-12 text-center text-pink-400 dark:text-pink-500">
+              <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-3xl bg-gradient-primary/10 mb-3">
+                <History size={40} className="text-pink-300" />
+              </div>
               <p className="font-medium">{search ? 'Nenhuma entrega encontrada.' : 'Nenhuma entrega para rastrear.'}</p>
             </div>
           )}
@@ -1277,7 +1285,7 @@ function TrackingView({ deliveries }: { deliveries: DeliveryWithRelations[] }) {
                     <div key={ev.id} className="flex gap-3">
                       <div className="flex flex-col items-center">
                         <div className={`h-3 w-3 rounded-full ${eventColor(ev.event_type)}`} />
-                        {i < events.length - 1 && <div className="h-full w-0.5 flex-1 bg-meell-100" />}
+                        {i < events.length - 1 && <div className="h-full w-0.5 flex-1 bg-pink-100 dark:bg-pink-900/30" />}
                       </div>
                       <div className="pb-3">
                         <div className="text-sm font-medium text-meell-700">{eventLabel(ev.event_type, ev.meta)}</div>
@@ -1307,7 +1315,7 @@ function TrackingView({ deliveries }: { deliveries: DeliveryWithRelations[] }) {
             </div>
           )}
           {selected && (
-            <div className="mt-4 border-t border-meell-50 pt-3 text-xs text-meell-500">
+            <div className="mt-4 border-t border-pink-50 dark:border-pink-900/20 pt-3 text-xs text-meell-500">
               <div className="flex justify-between"><span>Token:</span><code className="text-meell-400">{selected.secure_token.slice(0, 12)}...</code></div>
               <div className="mt-1 flex justify-between"><span>Último acesso:</span><span>{timeAgo(selected.first_viewed_at)}</span></div>
               <div className="mt-1 flex justify-between"><span>Último download:</span><span>{timeAgo(selected.last_downloaded_at)}</span></div>
@@ -1321,14 +1329,14 @@ function TrackingView({ deliveries }: { deliveries: DeliveryWithRelations[] }) {
 
 function eventColor(t: string) {
   return {
-    created: 'bg-meell-500',
-    viewed: 'bg-lilas-500',
+    created: 'bg-pink-500',
+    viewed: 'bg-violet-500',
     downloaded: 'bg-emerald-500',
     revoked: 'bg-rose-500',
     expired: 'bg-amber-500',
     shared: 'bg-blue-500',
     blocked: 'bg-rose-400',
-  }[t] ?? 'bg-meell-300';
+  }[t] ?? 'bg-pink-300';
 }
 function eventLabel(t: string, meta?: Record<string, unknown> | null) {
   if (t === 'shared' && meta?.shared_by_name && meta?.shared_with_name) {
@@ -1384,7 +1392,7 @@ function PlanView({ profile, onChange, logActivity }: {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-meell-800">Plano e assinatura</h1>
+        <h1 className="section-title">Plano e assinatura</h1>
         <p className="text-sm text-meell-500">Assinatura mensal recorrente, estilo Netflix.</p>
       </div>
 
@@ -1394,7 +1402,7 @@ function PlanView({ profile, onChange, logActivity }: {
             <div className="text-xs uppercase text-meell-400">Plano atual</div>
             <div className="text-xl font-bold text-meell-800">{plans.find((p) => p.id === profile.plan_id)?.name ?? 'Grátis'}</div>
           </div>
-          <span className="pill bg-emerald-50 text-emerald-600"><Shield size={12} /> Ativa</span>
+          <span className="pill badge-success"><Shield size={12} /> Ativa</span>
         </div>
         <div className="mt-3 text-xs text-meell-400">
           A arquitetura do Meell Protect já está preparada para integração com pagamentos recorrentes reais (ex.: Stripe). Por enquanto, a troca de plano é registrada no banco para demonstração.
@@ -1403,7 +1411,7 @@ function PlanView({ profile, onChange, logActivity }: {
 
       <div className="grid gap-4 lg:grid-cols-4">
         {plans.map((p) => (
-          <div key={p.id} className={`card flex flex-col ${p.id === profile.plan_id ? 'ring-2 ring-meell-400' : ''}`}>
+          <div key={p.id} className={`card flex flex-col ${p.id === profile.plan_id ? 'ring-2 ring-pink-400 dark:ring-pink-600 shadow-glow' : ''}`}>
             <div className="text-sm font-semibold text-meell-500">{p.name}</div>
             <div className="mt-1 text-2xl font-bold text-meell-800">{p.price_label}</div>
             <ul className="mt-3 space-y-1 text-xs text-meell-600">
@@ -1421,7 +1429,7 @@ function PlanView({ profile, onChange, logActivity }: {
                 else changePlan(p);
               }}
               disabled={loading || p.id === profile.plan_id}
-              className={p.id === profile.plan_id ? 'btn-soft mt-4' : 'btn-primary mt-4'}
+              className={p.id === profile.plan_id ? 'btn-ghost mt-4' : 'btn-primary mt-4'}
             >
               {p.id === profile.plan_id ? 'Plano atual' : p.id === 'free' ? 'Voltar para Grátis' : `Assinar ${p.name}`}
             </button>
@@ -1451,7 +1459,7 @@ function ProfileView() {
   return (
     <div className="max-w-xl space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-meell-800">Perfil</h1>
+        <h1 className="section-title">Perfil</h1>
         <p className="text-sm text-meell-500">Suas informações públicas no Meell Protect.</p>
       </div>
       <form onSubmit={save} className="card space-y-4">
@@ -1506,7 +1514,7 @@ function SettingsView() {
   return (
     <div className="max-w-xl space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-meell-800 dark:text-slate-100">Configurações</h1>
+        <h1 className="section-title">Configurações</h1>
         <p className="text-sm text-meell-500 dark:text-slate-400">Preferências da conta.</p>
       </div>
       <div className="card space-y-3">
@@ -1524,7 +1532,7 @@ function SettingsView() {
           </div>
           <button
             onClick={toggleDark}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${darkMode ? 'bg-meell-500' : 'bg-gray-300'}`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${darkMode ? 'bg-gradient-primary' : 'bg-gray-300'}`}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${darkMode ? 'translate-x-6' : 'translate-x-1'}`}>
               {darkMode ? <Moon size={10} className="mx-auto text-meell-600" /> : <Sun size={10} className="mx-auto text-amber-500" />}
@@ -1542,7 +1550,7 @@ function SettingsView() {
       <div className="card space-y-3">
         <h2 className="font-semibold text-meell-800 dark:text-slate-100">Sobre o Meell Protect</h2>
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-meell-500 to-lilas-500 text-white">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-glow">
             <Shield size={24} />
           </div>
           <div>
@@ -1551,7 +1559,7 @@ function SettingsView() {
             <div className="text-xs text-meell-400">Desenvolvido por Meell</div>
           </div>
         </div>
-        <div className="rounded-2xl bg-meell-50 p-3 text-xs text-meell-600 space-y-1">
+        <div className="rounded-2xl bg-pink-50/50 dark:bg-pink-900/15 p-3 text-xs text-meell-600 space-y-1 ring-1 ring-pink-100 dark:ring-pink-900/30">
           <div className="font-semibold text-meell-700 mb-2">Funcionalidades implementadas</div>
           <div className="flex items-center gap-1.5"><Check size={12} className="text-emerald-500" /> Proteção de arquivos com ID Meell único</div>
           <div className="flex items-center gap-1.5"><Check size={12} className="text-emerald-500" /> Upload único, múltiplos arquivos e pasta inteira</div>

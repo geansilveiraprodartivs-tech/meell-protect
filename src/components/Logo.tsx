@@ -5,18 +5,15 @@ export default React.memo(function Logo({ size = 36, withText = true }: { size?:
   return (
     <div className="flex items-center gap-2.5">
       <div
-        className="relative flex items-center justify-center rounded-2xl bg-gradient-to-br from-meell-500 to-lilas-500 text-white shadow-soft"
+        className="relative flex items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-glow"
         style={{ width: size, height: size }}
       >
         <Shield size={size * 0.55} strokeWidth={2.4} />
       </div>
       {withText && (
         <div className="leading-tight">
-          <div className="text-base font-bold tracking-tight text-meell-700">
-            MEELL <span className="text-lilas-600">PROTECT</span>
-          </div>
-          <div className="text-[10px] font-medium uppercase tracking-widest text-meell-300">
-            by Meell
+          <div className="text-base font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-primary" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800 }}>
+            MEELL PROTECT
           </div>
         </div>
       )}

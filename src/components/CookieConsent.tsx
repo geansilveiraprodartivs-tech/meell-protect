@@ -14,9 +14,9 @@ export default function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 border-t border-meell-100 bg-white/95 px-5 py-4 shadow-soft backdrop-blur">
+    <div className="fixed bottom-0 inset-x-0 z-50 border-t border-pink-100 dark:border-pink-900/30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl px-5 py-4 shadow-glow">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 sm:flex-row">
-        <p className="text-sm text-meell-600">
+        <p className="text-sm text-meell-600 dark:text-slate-300">
           Este site usa cookies para melhorar sua experiência. Ao continuar navegando, você concorda com nossa política de cookies.
         </p>
         <button

@@ -166,7 +166,7 @@ export default function VerifyFile() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-meell-800">Verificar Arquivo</h1>
+        <h1 className="section-title">Verificar Arquivo</h1>
         <p className="text-sm text-meell-500">
           Envie um arquivo para verificar se ele foi protegido pelo Meell Protect e rastrear sua origem.
         </p>
@@ -174,16 +174,16 @@ export default function VerifyFile() {
 
       {status === 'idle' && (
         <div
-          className={`card flex cursor-pointer flex-col items-center justify-center gap-3 py-16 transition ${dragOver ? 'ring-2 ring-meell-400' : 'hover:ring-2 hover:ring-meell-200'}`}
+          className={`card flex cursor-pointer flex-col items-center justify-center gap-3 py-16 transition ${dragOver ? 'ring-2 ring-pink-400 shadow-glow' : 'hover:ring-2 hover:ring-pink-200 dark:hover:ring-pink-800'}`}
           onDrop={handleDrop}
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
           onClick={() => fileInputRef.current?.click()}
         >
-          <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-meell-100 to-lilas-100">
-            <Upload size={28} className="text-meell-500" />
+          <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-primary shadow-glow">
+            <Upload size={28} className="text-white" />
           </div>
-          <div className="text-sm font-semibold text-meell-700">Arraste o arquivo aqui ou selecione do computador</div>
+          <div className="text-sm font-semibold text-meell-700 dark:text-slate-200">Arraste o arquivo aqui ou selecione do computador</div>
           <div className="text-xs text-meell-400">JPG, PNG, WEBP, PDF — até 20 MB</div>
           <button className="btn-primary mt-2"><FileCheck2 size={16} /> Selecionar arquivo</button>
           <input ref={fileInputRef} type="file" style={{ display: 'none' }} accept="image/jpeg,image/png,image/webp,application/pdf" onChange={handleSelect} />
@@ -192,7 +192,7 @@ export default function VerifyFile() {
 
       {status === 'loading' && (
         <div className="card flex flex-col items-center gap-4 py-16">
-          <RefreshCw size={28} className="animate-spin text-meell-500" />
+          <RefreshCw size={28} className="animate-spin text-pink-500" />
           <p className="text-sm text-meell-500">Analisando <strong>{fileName}</strong>…</p>
         </div>
       )}
@@ -200,21 +200,21 @@ export default function VerifyFile() {
       {status === 'error' && (
         <div className="card space-y-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-500"><AlertCircle size={22} /></div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 dark:bg-rose-900/30 text-rose-500"><AlertCircle size={22} /></div>
             <h2 className="text-lg font-semibold text-meell-800">Erro na verificação</h2>
           </div>
           <p className="text-sm text-meell-600">{errorMsg}</p>
-          <button className="btn-soft" onClick={reset}>Tentar novamente</button>
+          <button className="btn-ghost" onClick={reset}>Tentar novamente</button>
         </div>
       )}
 
       {status === 'identified' && result?.copy && (
         <div className="card space-y-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600"><ShieldCheck size={22} /></div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-glow"><ShieldCheck size={22} /></div>
             <div>
               <h2 className="text-lg font-semibold text-meell-800">Arquivo protegido identificado</h2>
-              <span className={`pill mt-1 ${result.copy.recipient_type === 'owner' ? 'bg-lilas-50 text-lilas-700' : 'bg-meell-50 text-meell-700'}`}>
+              <span className={`pill mt-1 ${result.copy.recipient_type === 'owner' ? 'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400' : 'bg-pink-50 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400'}`}>
                 {result.copy.recipient_type === 'owner' ? 'Cópia protegida do proprietário' : 'Cópia protegida de entrega'}
               </span>
             </div>
@@ -237,46 +237,44 @@ export default function VerifyFile() {
             <Field icon={ShieldCheck} label="Camada Detectada" value={layerLabel(result.layer)} />
           </div>
 
-          {/* Chain of custody — only shown when chain is present (owner view only) */}
           {result.copy.chain && result.copy.chain.length > 0 && (
             <div>
-              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-meell-400">Cadeia de custódia</div>
+              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-pink-400">Cadeia de custódia</div>
               <div className="space-y-2">
                 {result.copy.chain.map((node, i) => (
                   <div key={node.copy_id} className="flex items-start gap-2">
-                    <div className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-meell-100 text-[10px] font-bold text-meell-600">
+                    <div className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-gradient-primary text-[10px] font-bold text-white">
                       {i + 1}
                     </div>
-                    <div className="rounded-xl bg-meell-50 px-3 py-2 text-xs text-meell-700 flex-1">
+                    <div className="rounded-xl bg-pink-50/80 dark:bg-pink-900/20 px-3 py-2 text-xs text-meell-700 flex-1">
                       <span className="font-semibold">{node.client?.name ?? 'Proprietário'}</span>
                       {' · '}
                       <span className="font-mono">{node.copy_id.substring(0, 16)}…</span>
-                      <span className="ml-2 text-meell-400">{new Date(node.created_at).toLocaleDateString('pt-BR')}</span>
+                      <span className="ml-2 text-pink-400">{new Date(node.created_at).toLocaleDateString('pt-BR')}</span>
                     </div>
                   </div>
                 ))}
-                {/* Current copy (leaf) */}
                 <div className="flex items-start gap-2">
-                  <div className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-700">
+                  <div className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-gradient-primary text-[10px] font-bold text-white">
                     {result.copy.chain.length + 1}
                   </div>
-                  <div className="rounded-xl bg-emerald-50 px-3 py-2 text-xs text-emerald-800 font-semibold flex-1">
+                  <div className="rounded-xl bg-gradient-primary/10 px-3 py-2 text-xs text-pink-700 dark:text-pink-300 font-semibold flex-1">
                     {result.copy.client?.name ?? 'Proprietário'} · <span className="font-mono">{result.copy.copy_id.substring(0, 16)}…</span>
-                    <span className="ml-1 text-emerald-600">(esta cópia)</span>
+                    <span className="ml-1 text-pink-500">(esta cópia)</span>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          <button className="btn-soft" onClick={reset}>Verificar outro arquivo</button>
+          <button className="btn-ghost" onClick={reset}>Verificar outro arquivo</button>
         </div>
       )}
 
       {status === 'not_found' && (
         <div className="card space-y-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-meell-50 text-meell-400"><ShieldX size={22} /></div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-pink-50 dark:bg-pink-900/30 text-pink-400"><ShieldX size={22} /></div>
             <h2 className="text-lg font-semibold text-meell-800">Proteção Meell não identificada</h2>
           </div>
           <p className="text-sm text-meell-600">
@@ -285,14 +283,14 @@ export default function VerifyFile() {
             removeu a identificação.
           </p>
           {result?.file_hash && <Field icon={Hash} label="Hash do Arquivo Enviado" value={result.file_hash.substring(0, 32) + '…'} mono />}
-          <button className="btn-soft" onClick={reset}>Verificar outro arquivo</button>
+          <button className="btn-ghost" onClick={reset}>Verificar outro arquivo</button>
         </div>
       )}
 
       {status === 'invalid' && (
         <div className="card space-y-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600"><ShieldAlert size={22} /></div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-900/30 text-amber-500"><ShieldAlert size={22} /></div>
             <h2 className="text-lg font-semibold text-meell-800">Identificador encontrado, mas não reconhecido</h2>
           </div>
           <p className="text-sm text-meell-600">
@@ -301,7 +299,7 @@ export default function VerifyFile() {
             identificador falsificado ou um registro que foi removido.
           </p>
           {result?.fingerprint_id && <Field icon={Fingerprint} label="Identificador Encontrado" value={maskFp(result.fingerprint_id)} mono />}
-          <button className="btn-soft" onClick={reset}>Verificar outro arquivo</button>
+          <button className="btn-ghost" onClick={reset}>Verificar outro arquivo</button>
         </div>
       )}
     </div>
@@ -310,8 +308,8 @@ export default function VerifyFile() {
 
 function Field({ icon: Icon, label, value, mono }: { icon: typeof FileCheck2; label: string; value: string; mono?: boolean }) {
   return (
-    <div className="rounded-2xl bg-meell-50/50 p-3 ring-1 ring-meell-50">
-      <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-meell-400">
+    <div className="rounded-2xl bg-pink-50/50 dark:bg-pink-900/15 p-3 ring-1 ring-pink-100 dark:ring-pink-900/30">
+      <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-pink-400">
         <Icon size={12} /> {label}
       </div>
       <div className={`mt-1 text-sm font-medium text-meell-800 ${mono ? 'font-mono text-xs' : ''}`}>{value}</div>

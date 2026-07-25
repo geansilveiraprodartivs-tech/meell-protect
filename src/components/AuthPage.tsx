@@ -19,7 +19,6 @@ export default function AuthPage({ mode, navigate }: Props) {
   const [accountType, setAccountType] = useState<AccountType>('creator');
   const [loading, setLoading] = useState(false);
 
-  // Restaurar e-mail lembrado (apenas no modo login)
   useEffect(() => {
     if (mode === 'login') {
       const remembered = localStorage.getItem('meell_remember') === 'true';
@@ -63,10 +62,8 @@ export default function AuthPage({ mode, navigate }: Props) {
         navigate('/app');
         return;
       }
-      // login
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      // Salvar ou limpar e-mail lembrado (nunca salva a senha)
       if (rememberEmail) {
         localStorage.setItem('meell_remember', 'true');
         localStorage.setItem('meell_email', email);
@@ -94,9 +91,9 @@ export default function AuthPage({ mode, navigate }: Props) {
   const isSignup = mode === 'signup';
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-gradient-hero">
       <div className="flex items-center justify-between px-5 py-4">
-        <button onClick={() => navigate('/')} className="flex items-center gap-2 text-sm text-meell-500 hover:text-meell-700">
+        <button onClick={() => navigate('/')} className="flex items-center gap-2 text-sm text-pink-500 hover:text-pink-600 transition">
           <ArrowLeft size={16} /> Voltar
         </button>
         <Logo />
@@ -104,11 +101,12 @@ export default function AuthPage({ mode, navigate }: Props) {
 
       <div className="flex flex-1 items-center justify-center px-5 py-8">
         <div className="w-full max-w-md animate-fadeUp">
-          <div className="card">
-            <h1 className="text-2xl font-bold text-meell-800">
+          <div className="glass rounded-3xl p-8 shadow-glow">
+            <div className="h-1 w-16 mx-auto mb-6 rounded-full bg-gradient-primary" />
+            <h1 className="text-2xl font-bold text-meell-800 dark:text-slate-100">
               {isLogin ? 'Entrar' : isSignup ? 'Criar conta' : 'Recuperar senha'}
             </h1>
-            <p className="mt-1 text-sm text-meell-500">
+            <p className="mt-1 text-sm text-meell-500 dark:text-slate-400">
               {isLogin
                 ? 'Acesse seu painel Meell Protect.'
                 : isSignup
@@ -125,12 +123,12 @@ export default function AuthPage({ mode, navigate }: Props) {
                     onClick={() => setAccountType('creator')}
                     className={`flex flex-col items-start gap-1 rounded-2xl p-3 text-left ring-1 transition ${
                       accountType === 'creator'
-                        ? 'bg-meell-50 ring-meell-300'
-                        : 'bg-white ring-meell-100 hover:bg-meell-50/50'
+                        ? 'bg-pink-50 dark:bg-pink-900/30 ring-pink-300 dark:ring-pink-700'
+                        : 'bg-white/60 dark:bg-slate-800/60 ring-meell-100 dark:ring-slate-700 hover:bg-pink-50/50 dark:hover:bg-pink-900/20'
                     }`}
                   >
-                    <Shield size={18} className="text-meell-500" />
-                    <span className="text-sm font-semibold text-meell-800">Criador/Vendedor</span>
+                    <Shield size={18} className="text-pink-500" />
+                    <span className="text-sm font-semibold text-meell-800 dark:text-slate-100">Criador/Vendedor</span>
                     <span className="text-[11px] text-meell-400">Assina para proteger e entregar</span>
                   </button>
                   <button
@@ -138,12 +136,12 @@ export default function AuthPage({ mode, navigate }: Props) {
                     onClick={() => setAccountType('client')}
                     className={`flex flex-col items-start gap-1 rounded-2xl p-3 text-left ring-1 transition ${
                       accountType === 'client'
-                        ? 'bg-lilas-50 ring-lilas-300'
-                        : 'bg-white ring-meell-100 hover:bg-lilas-50/50'
+                        ? 'bg-violet-50 dark:bg-violet-900/30 ring-violet-300 dark:ring-violet-700'
+                        : 'bg-white/60 dark:bg-slate-800/60 ring-meell-100 dark:ring-slate-700 hover:bg-violet-50/50 dark:hover:bg-violet-900/20'
                     }`}
                   >
-                    <ShoppingBag size={18} className="text-lilas-500" />
-                    <span className="text-sm font-semibold text-meell-800">Cliente final</span>
+                    <ShoppingBag size={18} className="text-violet-500" />
+                    <span className="text-sm font-semibold text-meell-800 dark:text-slate-100">Cliente final</span>
                     <span className="text-[11px] text-meell-400">Conta gratuita para baixar</span>
                   </button>
                 </div>
@@ -155,7 +153,7 @@ export default function AuthPage({ mode, navigate }: Props) {
                 <div>
                   <label className="label">Nome</label>
                   <div className="relative">
-                    <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-meell-300" />
+                    <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300" />
                     <input
                       className="input pl-10"
                       placeholder="Seu nome"
@@ -169,7 +167,7 @@ export default function AuthPage({ mode, navigate }: Props) {
               <div>
                 <label className="label">E-mail</label>
                 <div className="relative">
-                  <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-meell-300" />
+                  <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300" />
                   <input
                     type="email"
                     className="input pl-10"
@@ -184,7 +182,7 @@ export default function AuthPage({ mode, navigate }: Props) {
                 <div>
                   <label className="label">Senha</label>
                   <div className="relative">
-                    <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-meell-300" />
+                    <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-300" />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       className="input pl-10 pr-10"
@@ -197,7 +195,7 @@ export default function AuthPage({ mode, navigate }: Props) {
                     <button
                       type="button"
                       onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-meell-300 hover:text-meell-500 transition"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-pink-300 hover:text-pink-500 transition"
                       tabIndex={-1}
                       aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                     >
@@ -213,7 +211,7 @@ export default function AuthPage({ mode, navigate }: Props) {
                     type="checkbox"
                     checked={rememberEmail}
                     onChange={(e) => setRememberEmail(e.target.checked)}
-                    className="rounded accent-meell-500"
+                    className="rounded accent-pink-500"
                   />
                   Lembrar meu e-mail
                 </label>
@@ -227,12 +225,12 @@ export default function AuthPage({ mode, navigate }: Props) {
             <div className="mt-5 space-y-2 text-center text-sm text-meell-500">
               {isLogin && (
                 <>
-                  <button onClick={() => navigate('/recovery')} className="hover:text-meell-700">
+                  <button onClick={() => navigate('/recovery')} className="hover:text-pink-500 transition">
                     Esqueci minha senha
                   </button>
                   <div>
                     Não tem conta?{' '}
-                    <button onClick={() => navigate('/signup')} className="font-semibold text-meell-600 hover:text-meell-700">
+                    <button onClick={() => navigate('/signup')} className="font-semibold text-transparent bg-clip-text bg-gradient-primary hover:opacity-80 transition">
                       Criar agora
                     </button>
                   </div>
@@ -241,7 +239,7 @@ export default function AuthPage({ mode, navigate }: Props) {
               {isSignup && (
                 <div>
                   Já tem conta?{' '}
-                  <button onClick={() => navigate('/login')} className="font-semibold text-meell-600 hover:text-meell-700">
+                  <button onClick={() => navigate('/login')} className="font-semibold text-transparent bg-clip-text bg-gradient-primary hover:opacity-80 transition">
                     Entrar
                   </button>
                 </div>
@@ -249,7 +247,7 @@ export default function AuthPage({ mode, navigate }: Props) {
               {mode === 'recovery' && (
                 <div>
                   Lembrou a senha?{' '}
-                  <button onClick={() => navigate('/login')} className="font-semibold text-meell-600 hover:text-meell-700">
+                  <button onClick={() => navigate('/login')} className="font-semibold text-transparent bg-clip-text bg-gradient-primary hover:opacity-80 transition">
                     Voltar para login
                   </button>
                 </div>

@@ -117,8 +117,6 @@ export default function ClientDashboard({
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
       const fnUrl = `${supabaseUrl}/functions/v1/delivery-download`;
 
-      // Download público autorizado pelo secure_token.
-      // Não exige login/JWT.
       const fnRes = await fetch(fnUrl, {
         method: "POST",
         headers: {
@@ -137,7 +135,6 @@ export default function ClientDashboard({
         );
       }
 
-      // Abre a URL assinada gerada pelo servidor.
       const a = document.createElement("a");
       a.href = fnData.url;
       a.download =
@@ -154,7 +151,6 @@ export default function ClientDashboard({
 
       toast("Download autorizado!", "success");
 
-      // Atualiza contador/status exibido no cartão.
       await load();
     } catch (err) {
       console.error("PUBLIC DOWNLOAD ERROR:", err);
@@ -230,12 +226,12 @@ export default function ClientDashboard({
   const visitorName = profile?.display_name || profile?.email || "Visitante";
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-40 border-b border-meell-100 bg-white/70 backdrop-blur-md">
+    <div className="min-h-screen bg-gradient-hero">
+      <header className="sticky top-0 z-40 border-b border-pink-100 dark:border-pink-900/30 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <Logo />
           <div className="flex items-center gap-2">
-            <span className="pill bg-lilas-50 text-lilas-700">
+            <span className="pill bg-gradient-primary/10 text-pink-600 dark:text-pink-400">
               <BookOpen size={12} /> Minha Biblioteca
             </span>
             <button
@@ -251,13 +247,13 @@ export default function ClientDashboard({
           </div>
         </div>
         {menuOpen && (
-          <div className="border-t border-meell-100 bg-white px-5 py-3 lg:hidden">
+          <div className="border-t border-pink-100 dark:border-pink-900/30 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl px-5 py-3 lg:hidden">
             <button
               onClick={async () => {
                 await signOut();
                 navigate("/");
               }}
-              className="flex w-full items-center gap-2 text-sm font-medium text-meell-600"
+              className="flex w-full items-center gap-2 text-sm font-medium text-rose-500 hover:text-rose-600"
             >
               <LogOut size={16} /> Sair
             </button>
@@ -267,21 +263,24 @@ export default function ClientDashboard({
 
       <div className="mx-auto max-w-6xl px-5 py-6 lg:py-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-meell-800">
-            Minha Biblioteca
-          </h1>
+          <h1 className="section-title">Minha Biblioteca</h1>
           <p className="text-sm text-meell-500">
             Olá, {visitorName}. Aqui está o arquivo protegido disponibilizado para você.
           </p>
         </div>
 
         {loading ? (
-          <div className="py-20 text-center text-meell-400">
+          <div className="py-20 text-center text-pink-400">
+            <div className="animate-pulse">
+              <FileCheck2 size={36} className="mx-auto mb-3 text-pink-300" />
+            </div>
             Carregando sua biblioteca...
           </div>
         ) : deliveries.length === 0 ? (
           <div className="card py-16 text-center">
-            <BookOpen size={36} className="mx-auto text-meell-300" />
+            <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-3xl bg-gradient-primary/10">
+              <BookOpen size={36} className="text-pink-400" />
+            </div>
             <h2 className="mt-3 text-lg font-semibold text-meell-700">
               Sua biblioteca está vazia
             </h2>
@@ -304,14 +303,14 @@ export default function ClientDashboard({
                   onMouseEnter={() => !blocked && markViewed(d)}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-meell-100 to-lilas-100 text-3xl">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary/10 text-3xl">
                       {fileEmoji(d.file?.mime_type ?? "")}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-semibold text-meell-800">
                         {d.file?.title}
                       </div>
-                      <div className="truncate text-xs text-meell-400">
+                      <div className="truncate text-xs text-pink-400">
                         {d.file?.meell_id}
                       </div>
                     </div>
@@ -337,19 +336,19 @@ export default function ClientDashboard({
 
                   <div className="mt-3">
                     {d.revoked ? (
-                      <span className="pill bg-rose-50 text-rose-600">
+                      <span className="pill badge-danger">
                         <Lock size={11} /> Revogado
                       </span>
                     ) : expired ? (
-                      <span className="pill bg-amber-50 text-amber-600">
+                      <span className="pill badge-warning">
                         <Clock size={11} /> Expirado
                       </span>
                     ) : exhausted ? (
-                      <span className="pill bg-amber-50 text-amber-600">
+                      <span className="pill badge-warning">
                         <AlertCircle size={11} /> Limite atingido
                       </span>
                     ) : (
-                      <span className="pill bg-emerald-50 text-emerald-600">
+                      <span className="pill badge-success">
                         <Shield size={11} /> Disponível
                       </span>
                     )}
@@ -374,13 +373,13 @@ export default function ClientDashboard({
                         setShareDelivery(d);
                         setShareResult(null);
                       }}
-                      className="btn-soft mt-2 w-full"
+                      className="btn-secondary mt-2 w-full"
                     >
                       <Share2 size={14} /> Compartilhar com proteção
                     </button>
                   )}
                   {d.last_downloaded_at && (
-                    <div className="mt-2 text-center text-[11px] text-meell-300">
+                    <div className="mt-2 text-center text-[11px] text-pink-300">
                       Último download {timeAgo(d.last_downloaded_at)}
                     </div>
                   )}
@@ -390,8 +389,8 @@ export default function ClientDashboard({
           </div>
         )}
 
-        <div className="mt-10 card flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-meell-500 to-lilas-500 text-white">
+        <div className="mt-10 card-gradient flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-glow">
             <Sparkles size={22} />
           </div>
           <div className="flex-1">
@@ -419,27 +418,27 @@ export default function ClientDashboard({
         </div>
       </div>
 
-      {/* Share modal */}
       {shareDelivery && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
-          <div className="card w-full max-w-md space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4 backdrop-blur-md">
+          <div className="glass rounded-3xl w-full max-w-md space-y-4 p-6 shadow-glow">
+            <div className="h-1 w-16 mx-auto mb-2 rounded-full bg-gradient-primary" />
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-meell-500 to-lilas-500 text-white">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-primary text-white shadow-glow">
                   <Share2 size={16} />
                 </div>
                 <div>
                   <div className="text-sm font-semibold text-meell-800">
                     Compartilhar com proteção
                   </div>
-                  <div className="text-xs text-meell-400 truncate max-w-[200px]">
+                  <div className="text-xs text-pink-400 truncate max-w-[200px]">
                     {shareDelivery.file?.title}
                   </div>
                 </div>
               </div>
               <button
                 onClick={closeShareModal}
-                className="text-meell-400 hover:text-meell-600"
+                className="text-meell-400 hover:text-pink-500 transition"
               >
                 <X size={18} />
               </button>
@@ -447,30 +446,30 @@ export default function ClientDashboard({
 
             {shareResult ? (
               <div className="space-y-3">
-                <div className="rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-800">
+                <div className="rounded-2xl bg-pink-50 dark:bg-pink-900/20 p-4 text-sm text-pink-800 dark:text-pink-200 ring-1 ring-pink-100 dark:ring-pink-800">
                   <div className="font-semibold mb-1">
-                    ✅ Compartilhamento gerado!
+                    Compartilhamento gerado!
                   </div>
-                  <div className="text-xs text-emerald-700">
+                  <div className="text-xs text-pink-700 dark:text-pink-300">
                     <strong>{shareResult.recipient_name}</strong> recebeu uma
                     cópia protegida com fingerprint único vinculado à sua
                     entrega.
                   </div>
                 </div>
-                <div className="rounded-2xl bg-meell-50 p-3 text-xs text-meell-600">
+                <div className="rounded-2xl bg-pink-50/50 dark:bg-pink-900/10 p-3 text-xs text-meell-600">
                   <div className="font-semibold text-meell-700 mb-1">
                     Token de acesso
                   </div>
-                  <div className="font-mono break-all text-meell-500">
+                  <div className="font-mono break-all text-pink-500">
                     {shareResult.new_token}
                   </div>
                 </div>
-                <div className="rounded-2xl bg-amber-50 p-3 text-xs text-amber-700">
+                <div className="rounded-2xl bg-amber-50 dark:bg-amber-900/20 p-3 text-xs text-amber-700 dark:text-amber-300">
                   <Shield size={12} className="inline mr-1" />O destinatário
                   precisa ter uma conta Meell Protect para acessar o arquivo com
                   este token.
                 </div>
-                <button className="btn-soft w-full" onClick={closeShareModal}>
+                <button className="btn-ghost w-full" onClick={closeShareModal}>
                   Fechar
                 </button>
               </div>
@@ -483,7 +482,7 @@ export default function ClientDashboard({
                   rastreado até esta cadeia.
                 </p>
                 <div>
-                  <label className="text-xs font-semibold text-meell-600">
+                  <label className="label">
                     Nome do destinatário
                   </label>
                   <input
@@ -496,7 +495,7 @@ export default function ClientDashboard({
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-meell-600">
+                  <label className="label">
                     E-mail do destinatário
                   </label>
                   <input
