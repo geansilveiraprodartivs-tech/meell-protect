@@ -1,19 +1,24 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
-
 import { extractFingerprint, detectMime, sha256Hex } from "../_shared/protection.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
+import { rateLimit } from "../_shared/rate-limit.ts";
 
 const MAX_VERIFY_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
+  }
+
+  const rl = rateLimit(req, 20, 60_000);
+  if (!rl.allowed) {
+    return new Response(JSON.stringify({ ok: false, error: `Rate limit exceeded. Try again in ${rl.retryAfter}s` }), {
+      status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {

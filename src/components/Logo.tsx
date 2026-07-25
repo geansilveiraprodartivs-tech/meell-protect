@@ -1,6 +1,7 @@
+import React from 'react';
 import { Shield } from 'lucide-react';
 
-export default function Logo({ size = 36, withText = true }: { size?: number; withText?: boolean }) {
+export default React.memo(function Logo({ size = 36, withText = true }: { size?: number; withText?: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
       <div
@@ -15,10 +16,10 @@ export default function Logo({ size = 36, withText = true }: { size?: number; wi
             MEELL <span className="text-lilas-600">PROTECT</span>
           </div>
           <div className="text-[10px] font-medium uppercase tracking-widest text-meell-300">
-            by Meell · v1.0 Beta
+            by Meell
           </div>
         </div>
       )}
     </div>
   );
-}
+});

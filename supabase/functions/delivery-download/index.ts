@@ -6,12 +6,8 @@ import {
   embedFingerprint,
   PROTECTION_VERSION,
 } from "../_shared/protection.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
+import { rateLimit } from "../_shared/rate-limit.ts";
 
 const COPIES_BUCKET = "delivery-copies";
 const ORIGINALS_BUCKET = "protected-files";
@@ -92,17 +88,18 @@ async function watermarkPdf(
 
   const footerText = `Protegido por Meell Protect • ID: ${copyId}`;
 
-  for (const page of pages) {
+  for (const [pageIndex, page] of pages.entries()) {
     const { width } = page.getSize();
-    const fontSize = 7;
+    const fontSize = 12;
+    const yOffset = 12 + pageIndex * 50;
     const textWidth = font.widthOfTextAtSize(footerText, fontSize);
     page.drawText(footerText, {
       x: (width - textWidth) / 2,
-      y: 12,
+      y: yOffset,
       size: fontSize,
       font,
       color: rgb(0.6, 0.6, 0.6),
-      opacity: 0.6,
+      opacity: 0.15,
     });
 
     // Custom watermark if enabled
@@ -114,8 +111,8 @@ async function watermarkPdf(
       }
       if (config.show_copy_id) lines.push(`ID: ${copyId}`);
 
-      const wmFontSize = 8;
-      let yOff = pages.length > 0 ? 30 : 20;
+      const wmFontSize = 12;
+      let yOff = yOffset + fontSize + 4;
       for (const line of lines) {
         const lw = font.widthOfTextAtSize(line, wmFontSize);
         page.drawText(line, {
@@ -124,7 +121,7 @@ async function watermarkPdf(
           size: wmFontSize,
           font,
           color: rgb(0.5, 0.5, 0.5),
-          opacity: 0.5,
+          opacity: 0.15,
         });
         yOff += wmFontSize + 2;
       }
@@ -210,8 +207,18 @@ function createServiceClient() {
 // --- Main handler ---
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
+  }
+
+  const rl = rateLimit(req, 30, 60_000);
+  if (!rl.allowed) {
+    return new Response(JSON.stringify({ error: `Rate limit exceeded. Try again in ${rl.retryAfter}s` }), {
+      status: 429,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   if (req.method !== "GET" && req.method !== "POST") {

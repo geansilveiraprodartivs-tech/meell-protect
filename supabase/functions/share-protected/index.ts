@@ -7,12 +7,9 @@ import {
   embedFingerprint,
   PROTECTION_VERSION,
 } from "../_shared/protection.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
+import { rateLimit } from "../_shared/rate-limit.ts";
+import { sanitizeInput } from "../_shared/sanitize.ts";
 
 function genToken(): string {
   const bytes = new Uint8Array(32);
@@ -21,8 +18,17 @@ function genToken(): string {
 }
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
+  }
+
+  const rl = rateLimit(req, 10, 60_000);
+  if (!rl.allowed) {
+    return new Response(JSON.stringify({ ok: false, error: `Rate limit exceeded. Try again in ${rl.retryAfter}s` }), {
+      status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   try {
@@ -33,6 +39,9 @@ Deno.serve(async (req: Request) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const safeName = sanitizeInput(recipient_name);
+    const safeEmail = sanitizeInput(recipient_email);
 
     // Use service role — all operations are owner-initiated via authenticated endpoint
     const supabase = createClient(
@@ -65,6 +74,31 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    if (delivery.allow_resharing === false) {
+      return new Response(JSON.stringify({ ok: false, error: "O reenvio foi desativado pelo criador para esta entrega" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check resharing depth (max 3 levels)
+    let depth = 0;
+    let currentId: string | null = delivery.id;
+    while (currentId && depth < 4) {
+      const { data: parent } = await supabase
+        .from("deliveries")
+        .select("parent_delivery_id")
+        .eq("id", currentId)
+        .maybeSingle();
+      if (!parent?.parent_delivery_id) break;
+      depth++;
+      currentId = parent.parent_delivery_id;
+    }
+    if (depth >= 3) {
+      return new Response(JSON.stringify({ ok: false, error: "Limite de compartilhamentos atingido (máximo 3 níveis)" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const file = delivery.file;
     const sharer = delivery.client; // the person doing the resharing
     if (!file || !sharer) {
@@ -76,7 +110,7 @@ Deno.serve(async (req: Request) => {
     const ownerUserId: string = file.user_id;
 
     // 2. Find or create recipient client under file owner
-    const recipientEmailNorm = recipient_email.toLowerCase().trim();
+    const recipientEmailNorm = safeEmail.toLowerCase();
     let recipientClient: any = null;
 
     const { data: existingClient } = await supabase
@@ -93,7 +127,7 @@ Deno.serve(async (req: Request) => {
         .from("clients")
         .insert({
           user_id: ownerUserId,
-          name: recipient_name.trim(),
+          name: safeName,
           email: recipientEmailNorm,
           notes: `Adicionado automaticamente via compartilhamento por ${sharer.name}`,
         })
@@ -132,6 +166,8 @@ Deno.serve(async (req: Request) => {
         revoked: false,
         protection_mode: delivery.protection_mode ?? "default",
         watermark_config: delivery.watermark_config,
+        parent_delivery_id: delivery.id,
+        allow_resharing: true,
       })
       .select("*")
       .maybeSingle();

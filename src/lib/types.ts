@@ -85,6 +85,8 @@ export interface Delivery {
   copy_id: string | null;
   protection_mode: 'default' | 'watermark' | 'none' | null;
   watermark_config: WatermarkConfig | null;
+  allow_resharing?: boolean | null;
+  parent_delivery_id?: string | null;
 }
 
 export interface WatermarkConfig {

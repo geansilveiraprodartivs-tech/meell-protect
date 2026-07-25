@@ -1,12 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
-
 import {
   generateFingerprintId,
   sha256Hex,
@@ -14,8 +8,11 @@ import {
   embedFingerprint,
   PROTECTION_VERSION,
 } from "../_shared/protection.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
@@ -68,10 +65,7 @@ Deno.serve(async (req: Request) => {
           status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const { data: cur } = await supabase.from("protected_files").select("downloads_count").eq("id", fileId).maybeSingle();
-      await supabase.from("protected_files")
-        .update({ downloads_count: (cur?.downloads_count || 0) + 1 })
-        .eq("id", fileId);
+      await supabase.rpc("increment_file_downloads", { p_file_id: fileId });
       return new Response(JSON.stringify({
         ok: true,
         mode: "identical",

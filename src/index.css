@@ -20,6 +20,20 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+}
+
+.dark body,
+.dark #root {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
 @layer components {
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-meell-500 to-lilas-500 px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:shadow-glow hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed;
@@ -27,23 +41,41 @@ body {
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-white/70 px-5 py-3 text-sm font-semibold text-meell-700 ring-1 ring-meell-100 backdrop-blur transition hover:bg-white hover:shadow-soft;
   }
+  .dark .btn-ghost {
+    @apply bg-slate-700/70 text-slate-200 ring-slate-600 hover:bg-slate-700;
+  }
   .btn-soft {
     @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-lilas-50 px-4 py-2 text-sm font-semibold text-lilas-700 ring-1 ring-lilas-100 transition hover:bg-lilas-100;
+  }
+  .dark .btn-soft {
+    @apply bg-slate-700 text-lilas-300 ring-slate-600 hover:bg-slate-600;
   }
   .card {
     @apply rounded-3xl bg-white/90 p-5 shadow-card ring-1 ring-meell-50 backdrop-blur;
   }
+  .dark .card {
+    @apply bg-slate-800/90 ring-slate-700;
+  }
   .input {
     @apply w-full rounded-2xl border border-meell-100 bg-white/80 px-4 py-3 text-sm text-meell-900 placeholder:text-meell-300 outline-none transition focus:border-meell-400 focus:ring-4 focus:ring-meell-100;
   }
+  .dark .input {
+    @apply border-slate-600 bg-slate-800/80 text-slate-100 placeholder:text-slate-500 focus:border-lilas-500 focus:ring-slate-600;
+  }
   .label {
     @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-meell-400;
+  }
+  .dark .label {
+    @apply text-slate-400;
   }
   .pill {
     @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
   }
   .section-title {
     @apply text-2xl font-semibold text-meell-800 sm:text-3xl;
+  }
+  .dark .section-title {
+    @apply text-slate-100;
   }
 }
 

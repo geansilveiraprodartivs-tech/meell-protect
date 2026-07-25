@@ -3,7 +3,8 @@ import {
   LayoutDashboard, ShieldPlus, Files, Users, Send, History, CreditCard,
   User as UserIcon, Settings, Menu, X, LogOut, Shield, Plus, Download,
   Eye, Lock, RefreshCw, Trash2, Copy, Check, AlertCircle, Search, FileCheck2,
-  Sparkles, TrendingUp, HardDrive, Package, ShieldCheck, Share2,
+  Sparkles, TrendingUp, HardDrive, Package, ShieldCheck, Share2, FileX,
+  UserX, Moon, Sun,
 } from 'lucide-react';
 import Logo from './Logo';
 import Modal from './Modal';
@@ -11,6 +12,7 @@ import { useAuth } from '../lib/auth';
 import { supabase, STORAGE_BUCKET } from '../lib/supabase';
 import { toast } from './Toaster';
 import VerifyFile from './VerifyFile';
+import { SkeletonCard } from './Skeleton';
 import {
   genMeellId, genToken, genFingerprint, formatBytes, formatDate, timeAgo, fileEmoji,
 } from '../lib/utils';
@@ -85,7 +87,7 @@ export default function CreatorDashboard({ navigate }: { navigate: (to: string) 
     <div className="flex min-h-screen">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-72 transform border-r border-meell-100 bg-white/80 backdrop-blur transition-transform lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 w-72 transform border-r border-meell-100 bg-white/80 backdrop-blur transition-transform lg:static lg:translate-x-0 dark:border-slate-700 dark:bg-slate-900/80 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -115,7 +117,7 @@ export default function CreatorDashboard({ navigate }: { navigate: (to: string) 
                 className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition ${
                   view === n.id
                     ? 'bg-gradient-to-r from-meell-500 to-lilas-500 text-white shadow-soft'
-                    : 'text-meell-700 hover:bg-meell-50'
+                    : 'text-meell-700 hover:bg-meell-50 dark:text-slate-300 dark:hover:bg-slate-800'
                 }`}
               >
                 <n.icon size={18} />
@@ -143,14 +145,14 @@ export default function CreatorDashboard({ navigate }: { navigate: (to: string) 
 
       {/* Main */}
       <main className="flex-1 lg:pl-0">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-meell-100 bg-white/70 px-5 py-3 backdrop-blur lg:px-8">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-meell-100 bg-white/70 px-5 py-3 backdrop-blur lg:px-8 dark:border-slate-700 dark:bg-slate-900/70">
           <div className="flex items-center gap-3">
             <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
-              <Menu size={22} className="text-meell-600" />
+              <Menu size={22} className="text-meell-600 dark:text-slate-300" />
             </button>
             <div>
-              <div className="text-xs text-meell-400">Olá,</div>
-              <div className="text-sm font-semibold text-meell-800">
+              <div className="text-xs text-meell-400 dark:text-slate-500">Olá,</div>
+              <div className="text-sm font-semibold text-meell-800 dark:text-slate-100">
                 {profile.display_name || profile.email}
               </div>
             </div>
@@ -164,7 +166,9 @@ export default function CreatorDashboard({ navigate }: { navigate: (to: string) 
 
         <div className="px-5 py-6 lg:px-8">
           {loading ? (
-            <div className="py-20 text-center text-meell-400">Carregando...</div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+            </div>
           ) : (
             <>
               {view === 'dashboard' && (
@@ -228,8 +232,8 @@ function DashboardView({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-meell-800">Dashboard</h1>
-        <p className="text-sm text-meell-500">Visão geral do seu Meell Protect.</p>
+        <h1 className="text-2xl font-bold text-meell-800 dark:text-slate-100">Dashboard</h1>
+        <p className="text-sm text-meell-500 dark:text-slate-400">Visão geral do seu Meell Protect.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -783,8 +787,10 @@ function FilesView({ files, plan, onChange, logActivity }: {
           </div>
         ))}
         {filtered.length === 0 && (
-          <div className="card col-span-full py-12 text-center text-meell-400">
-            Nenhum arquivo protegido ainda.
+          <div className="card col-span-full py-12 text-center text-meell-400 dark:text-slate-500">
+            <FileX size={40} className="mx-auto mb-3 opacity-40" />
+            <p className="font-medium">{search ? 'Nenhum arquivo encontrado.' : 'Nenhum arquivo protegido ainda.'}</p>
+            {!search && <p className="mt-1 text-xs">Faça upload do seu primeiro arquivo para começar a proteger seus conteúdos.</p>}
           </div>
         )}
       </div>
@@ -822,6 +828,8 @@ function ClientsView({ clients, deliveries, onChange, logActivity }: {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [notes, setNotes] = useState('');
+  const [search, setSearch] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<ClientRow | null>(null);
 
   async function addClient(e: React.FormEvent) {
     e.preventDefault();
@@ -840,21 +848,32 @@ function ClientsView({ clients, deliveries, onChange, logActivity }: {
     await supabase.from('clients').delete().eq('id', c.id);
     await logActivity('client_deleted', `Cliente "${c.name}" removido`);
     toast('Cliente removido.', 'success');
+    setConfirmDelete(null);
     onChange();
   }
 
+  const filtered = clients.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-meell-800">Meus clientes</h1>
-          <p className="text-sm text-meell-500">{clients.length} cliente(s) cadastrado(s)</p>
+          <h1 className="text-2xl font-bold text-meell-800 dark:text-slate-100">Meus clientes</h1>
+          <p className="text-sm text-meell-500 dark:text-slate-400">{clients.length} cliente(s) cadastrado(s)</p>
         </div>
-        <button onClick={() => setOpen(true)} className="btn-primary"><Plus size={16} /> Novo cliente</button>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-meell-300 dark:text-slate-500" />
+            <input className="input pl-9" placeholder="Buscar cliente..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+          <button onClick={() => setOpen(true)} className="btn-primary"><Plus size={16} /> Novo cliente</button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {clients.map((c) => {
+        {filtered.map((c) => {
           const count = deliveries.filter((d) => d.client_id === c.id).length;
           return (
             <div key={c.id} className="card">
@@ -863,24 +882,26 @@ function ClientsView({ clients, deliveries, onChange, logActivity }: {
                   {c.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-semibold text-meell-800">{c.name}</div>
-                  <div className="truncate text-xs text-meell-400">{c.email}</div>
+                  <div className="truncate text-sm font-semibold text-meell-800 dark:text-slate-100">{c.name}</div>
+                  <div className="truncate text-xs text-meell-400 dark:text-slate-500">{c.email}</div>
                 </div>
               </div>
-              <div className="mt-3 flex items-center justify-between text-xs text-meell-500">
+              <div className="mt-3 flex items-center justify-between text-xs text-meell-500 dark:text-slate-400">
                 <span>{count} entrega(s)</span>
                 <span>{timeAgo(c.created_at)}</span>
               </div>
-              {c.notes && <p className="mt-2 text-xs text-meell-400">{c.notes}</p>}
-              <button onClick={() => remove(c)} className="mt-3 text-xs text-rose-500 hover:text-rose-700">
+              {c.notes && <p className="mt-2 text-xs text-meell-400 dark:text-slate-500">{c.notes}</p>}
+              <button onClick={() => setConfirmDelete(c)} className="mt-3 text-xs text-rose-500 hover:text-rose-700">
                 Remover
               </button>
             </div>
           );
         })}
-        {clients.length === 0 && (
-          <div className="card col-span-full py-12 text-center text-meell-400">
-            Nenhum cliente cadastrado ainda.
+        {filtered.length === 0 && (
+          <div className="card col-span-full py-12 text-center text-meell-400 dark:text-slate-500">
+            <UserX size={40} className="mx-auto mb-3 opacity-40" />
+            <p className="font-medium">{search ? 'Nenhum cliente encontrado.' : 'Nenhum cliente cadastrado ainda.'}</p>
+            {!search && <p className="mt-1 text-xs">Cadastre seu primeiro cliente para começar a enviar entregas seguras.</p>}
           </div>
         )}
       </div>
@@ -901,6 +922,23 @@ function ClientsView({ clients, deliveries, onChange, logActivity }: {
           </div>
           <button type="submit" className="btn-primary w-full">Cadastrar</button>
         </form>
+      </Modal>
+
+      <Modal open={!!confirmDelete} onClose={() => setConfirmDelete(null)} title="Confirmar exclusão">
+        {confirmDelete && (
+          <div className="space-y-3">
+            <p className="text-sm text-meell-600 dark:text-slate-300">
+              Tem certeza que deseja excluir o cliente <strong>{confirmDelete.name}</strong>?
+              Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex gap-2">
+              <button onClick={() => setConfirmDelete(null)} className="btn-ghost flex-1">Cancelar</button>
+              <button onClick={() => remove(confirmDelete)} className="flex-1 rounded-2xl bg-rose-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-600">
+                <Trash2 size={14} className="inline" /> Excluir
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );
@@ -926,6 +964,8 @@ function DeliveriesView({ files, clients, deliveries, onChange, logActivity }: {
   const [wmCopyId, setWmCopyId] = useState(true);
   const [wmEmailMask, setWmEmailMask] = useState(true);
   const [copied, setCopied] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [confirmRevoke, setConfirmRevoke] = useState<DeliveryWithRelations | null>(null);
 
   async function create(e: React.FormEvent) {
     e.preventDefault();
@@ -973,18 +1013,36 @@ function DeliveriesView({ files, clients, deliveries, onChange, logActivity }: {
     onChange();
   }
 
+  async function toggleAllowResharing(d: DeliveryWithRelations) {
+    const newValue = d.allow_resharing === false ? true : false;
+    await supabase.from('deliveries').update({ allow_resharing: newValue }).eq('id', d.id);
+    toast(newValue ? 'Reenvio ativado.' : 'Reenvio desativado.', 'success');
+    onChange();
+  }
+
   const link = (t: string) => { const base = window.location.pathname.replace(/\/+$/, ''); return `${window.location.origin}${base}/#/app?token=${t}`; };
+
+  const filtered = deliveries.filter((d) => {
+    const q = search.toLowerCase();
+    return !q || (d.file?.title ?? '').toLowerCase().includes(q) || (d.client?.name ?? '').toLowerCase().includes(q);
+  });
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-meell-800">Entregas</h1>
-          <p className="text-sm text-meell-500">{deliveries.length} entrega(s) · links seguros</p>
+          <h1 className="text-2xl font-bold text-meell-800 dark:text-slate-100">Entregas</h1>
+          <p className="text-sm text-meell-500 dark:text-slate-400">{deliveries.length} entrega(s) · links seguros</p>
         </div>
-        <button onClick={() => setOpen(true)} className="btn-primary" disabled={files.length === 0 || clients.length === 0}>
-          <Plus size={16} /> Nova entrega
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-meell-300 dark:text-slate-500" />
+            <input className="input pl-9" placeholder="Buscar entrega..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+          <button onClick={() => setOpen(true)} className="btn-primary" disabled={files.length === 0 || clients.length === 0}>
+            <Plus size={16} /> Nova entrega
+          </button>
+        </div>
       </div>
 
       {files.length === 0 || clients.length === 0 ? (
@@ -993,54 +1051,76 @@ function DeliveriesView({ files, clients, deliveries, onChange, logActivity }: {
         </div>
       ) : (
         <div className="space-y-3">
-          {deliveries.map((d) => {
+          {filtered.map((d) => {
             const expired = d.expires_at && new Date(d.expires_at) < new Date();
             const status = d.revoked ? 'Revogada' : expired ? 'Expirada' : 'Ativa';
             const statusStyle = d.revoked
-              ? 'bg-rose-50 text-rose-600'
+              ? 'bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'
               : expired
-              ? 'bg-amber-50 text-amber-600'
-              : 'bg-emerald-50 text-emerald-600';
+              ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
+              : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400';
             return (
               <div key={d.id} className="card">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-sm font-semibold text-meell-800">{d.file?.title}</div>
-                    <div className="text-xs text-meell-400">Para {d.client?.name} · {d.client?.email}</div>
+                    <div className="text-sm font-semibold text-meell-800 dark:text-slate-100">{d.file?.title}</div>
+                    <div className="text-xs text-meell-400 dark:text-slate-500">Para {d.client?.name} · {d.client?.email}</div>
                   </div>
                   <span className={`pill ${statusStyle}`}>
                     <Lock size={11} /> {status}
                   </span>
                 </div>
-                <div className="mt-3 grid gap-2 text-xs text-meell-500 sm:grid-cols-4">
-                  <div><span className="text-meell-400">Downloads:</span> {d.download_count}/{d.download_limit}</div>
-                  <div><span className="text-meell-400">Expira:</span> {formatDate(d.expires_at)}</div>
-                  <div><span className="text-meell-400">Último download:</span> {timeAgo(d.last_downloaded_at)}</div>
-                  <div><span className="text-meell-400">Criada:</span> {timeAgo(d.created_at)}</div>
+                <div className="mt-3 grid gap-2 text-xs text-meell-500 dark:text-slate-400 sm:grid-cols-4">
+                  <div><span className="text-meell-400 dark:text-slate-500">Downloads:</span> {d.download_count}/{d.download_limit}</div>
+                  <div><span className="text-meell-400 dark:text-slate-500">Expira:</span> {formatDate(d.expires_at)}</div>
+                  <div><span className="text-meell-400 dark:text-slate-500">Último download:</span> {timeAgo(d.last_downloaded_at)}</div>
+                  <div><span className="text-meell-400 dark:text-slate-500">Criada:</span> {timeAgo(d.created_at)}</div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(link(d.secure_token));
                       setCopied(d.id);
+                      toast('Link copiado!', 'success');
                       setTimeout(() => setCopied(null), 1500);
                     }}
                     className="btn-soft"
                   >
                     {copied === d.id ? <Check size={14} /> : <Copy size={14} />} Copiar link
                   </button>
-                  <button onClick={() => toggleRevoke(d)} className="btn-soft">
+                  <button onClick={() => setConfirmRevoke(d)} className="btn-soft">
                     <RefreshCw size={14} /> {d.revoked ? 'Reativar' : 'Revogar'}
                   </button>
                 </div>
               </div>
             );
           })}
-          {deliveries.length === 0 && (
-            <div className="card py-12 text-center text-meell-400">Nenhuma entrega criada ainda.</div>
+          {filtered.length === 0 && (
+            <div className="card py-12 text-center text-meell-400 dark:text-slate-500">
+              <Send size={40} className="mx-auto mb-3 opacity-40" />
+              <p className="font-medium">{search ? 'Nenhuma entrega encontrada.' : 'Nenhuma entrega criada ainda.'}</p>
+              {!search && <p className="mt-1 text-xs">Crie uma entrega segura para compartilhar arquivos protegidos com seus clientes.</p>}
+            </div>
           )}
         </div>
       )}
+
+      <Modal open={!!confirmRevoke} onClose={() => setConfirmRevoke(null)} title="Confirmar alteração">
+        {confirmRevoke && (
+          <div className="space-y-3">
+            <p className="text-sm text-meell-600 dark:text-slate-300">
+              Tem certeza que deseja {confirmRevoke.revoked ? 'reativar' : 'revogar'} esta entrega?
+              {confirmRevoke.revoked ? 'O cliente poderá acessar o link novamente.' : 'O cliente não poderá mais acessar o link.'}
+            </p>
+            <div className="flex gap-2">
+              <button onClick={() => setConfirmRevoke(null)} className="btn-ghost flex-1">Cancelar</button>
+              <button onClick={() => toggleRevoke(confirmRevoke)} className="flex-1 rounded-2xl bg-rose-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-600">
+                <RefreshCw size={14} className="inline" /> {confirmRevoke.revoked ? 'Reativar' : 'Revogar'}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <Modal open={open} onClose={() => setOpen(false)} title="Nova entrega segura">
         <form onSubmit={create} className="space-y-3">
@@ -1129,6 +1209,7 @@ function TrackingView({ deliveries }: { deliveries: DeliveryWithRelations[] }) {
   const [selected, setSelected] = useState<DeliveryWithRelations | null>(null);
   const [events, setEvents] = useState<DeliveryEvent[]>([]);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
 
   async function loadEvents(d: DeliveryWithRelations) {
     setSelected(d);
@@ -1142,29 +1223,45 @@ function TrackingView({ deliveries }: { deliveries: DeliveryWithRelations[] }) {
     setLoading(false);
   }
 
+  const filtered = deliveries.filter((d) => {
+    const q = search.toLowerCase();
+    return !q || (d.file?.title ?? '').toLowerCase().includes(q) || (d.client?.name ?? '').toLowerCase().includes(q);
+  });
+
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold text-meell-800">Rastreamento e histórico</h1>
-        <p className="text-sm text-meell-500">Linha do tempo completa de cada entrega.</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-meell-800 dark:text-slate-100">Rastreamento e histórico</h1>
+          <p className="text-sm text-meell-500 dark:text-slate-400">Linha do tempo completa de cada entrega.</p>
+        </div>
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-meell-300 dark:text-slate-500" />
+          <input className="input pl-9" placeholder="Buscar por arquivo ou cliente..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <div className="space-y-3">
-          {deliveries.map((d) => (
+          {filtered.map((d) => (
             <button
               key={d.id}
               onClick={() => loadEvents(d)}
-              className={`card w-full text-left transition ${selected?.id === d.id ? 'ring-2 ring-meell-300' : ''}`}
+              className={`card w-full text-left transition ${selected?.id === d.id ? 'ring-2 ring-meell-300 dark:ring-lilas-500' : ''}`}
             >
               <div className="flex items-center justify-between">
-                <div className="text-sm font-semibold text-meell-800">{d.file?.title}</div>
-                <span className="text-xs text-meell-400">{d.download_count} downloads</span>
+                <div className="text-sm font-semibold text-meell-800 dark:text-slate-100">{d.file?.title}</div>
+                <span className="text-xs text-meell-400 dark:text-slate-500">{d.download_count} downloads</span>
               </div>
-              <div className="text-xs text-meell-400">Para {d.client?.name} · {timeAgo(d.created_at)}</div>
+              <div className="text-xs text-meell-400 dark:text-slate-500">Para {d.client?.name} · {timeAgo(d.created_at)}</div>
             </button>
           ))}
-          {deliveries.length === 0 && <div className="card py-12 text-center text-meell-400">Nenhuma entrega para rastrear.</div>}
+          {filtered.length === 0 && (
+            <div className="card py-12 text-center text-meell-400 dark:text-slate-500">
+              <History size={40} className="mx-auto mb-3 opacity-40" />
+              <p className="font-medium">{search ? 'Nenhuma entrega encontrada.' : 'Nenhuma entrega para rastrear.'}</p>
+            </div>
+          )}
         </div>
 
         <div className="card">
@@ -1378,28 +1475,63 @@ function ProfileView() {
 
 function SettingsView() {
   const { signOut } = useAuth();
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') === 'dark' ||
+        (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    return false;
+  });
+
+  function toggleDark() {
+    const next = !darkMode;
+    setDarkMode(next);
+    if (next) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
   return (
     <div className="max-w-xl space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-meell-800">Configurações</h1>
-        <p className="text-sm text-meell-500">Preferências da conta.</p>
+        <h1 className="text-2xl font-bold text-meell-800 dark:text-slate-100">Configurações</h1>
+        <p className="text-sm text-meell-500 dark:text-slate-400">Preferências da conta.</p>
       </div>
       <div className="card space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-sm font-semibold text-meell-800">Notificações por e-mail</div>
-            <div className="text-xs text-meell-400">Receber alertas de download e acesso</div>
+            <div className="text-sm font-semibold text-meell-800 dark:text-slate-100">Notificações por e-mail</div>
+            <div className="text-xs text-meell-400 dark:text-slate-500">Receber alertas de download e acesso</div>
           </div>
           <input type="checkbox" defaultChecked className="h-5 w-5 rounded accent-meell-500" />
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-sm font-semibold text-meell-800">Modo escuro</div>
-            <div className="text-xs text-meell-400">Em breve</div>
+            <div className="text-sm font-semibold text-meell-800 dark:text-slate-100">Modo escuro</div>
+            <div className="text-xs text-meell-400 dark:text-slate-500">Alternar entre tema claro e escuro</div>
           </div>
-          <input type="checkbox" disabled className="h-5 w-5 rounded accent-meell-500" />
+          <button
+            onClick={toggleDark}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${darkMode ? 'bg-meell-500' : 'bg-gray-300'}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${darkMode ? 'translate-x-6' : 'translate-x-1'}`}>
+              {darkMode ? <Moon size={10} className="mx-auto text-meell-600" /> : <Sun size={10} className="mx-auto text-amber-500" />}
+            </span>
+          </button>
         </div>
-        <div className="border-t border-meell-50 pt-3">
+        <div className="border-t border-meell-50 dark:border-slate-700 pt-3">
           <button onClick={signOut} className="btn-ghost text-rose-600">
             <LogOut size={14} /> Encerrar sessão
           </button>
@@ -1408,7 +1540,7 @@ function SettingsView() {
 
       {/* Sobre o Meell Protect */}
       <div className="card space-y-3">
-        <h2 className="font-semibold text-meell-800">Sobre o Meell Protect</h2>
+        <h2 className="font-semibold text-meell-800 dark:text-slate-100">Sobre o Meell Protect</h2>
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-meell-500 to-lilas-500 text-white">
             <Shield size={24} />

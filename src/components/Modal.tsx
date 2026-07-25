@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import React, { useEffect, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 
 interface ModalProps {
@@ -9,7 +9,7 @@ interface ModalProps {
   maxWidth?: string;
 }
 
-export default function Modal({ open, onClose, title, children, maxWidth = 'max-w-lg' }: ModalProps) {
+export default React.memo(function Modal({ open, onClose, title, children, maxWidth = 'max-w-lg' }: ModalProps) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -43,4 +43,4 @@ export default function Modal({ open, onClose, title, children, maxWidth = 'max-
       </div>
     </div>
   );
-}
+});

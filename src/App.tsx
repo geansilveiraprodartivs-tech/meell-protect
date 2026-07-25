@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { AuthProvider, useAuth } from "./lib/auth";
 import { useRouter } from "./lib/router";
 import { FullPageSpinner } from "./components/Spinner";
@@ -6,7 +6,8 @@ import { Toaster, toast } from "./components/Toaster";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Landing from "./components/Landing";
 import AuthPage from "./components/AuthPage";
-import CreatorDashboard from "./components/CreatorDashboard";
+import CookieConsent from "./components/CookieConsent";
+const CreatorDashboard = React.lazy(() => import("./components/CreatorDashboard"));
 import ClientDashboard from "./components/ClientDashboard";
 import MeellChat from "./components/MeellChat";
 import { supabase } from "./lib/supabase";
@@ -43,7 +44,7 @@ function Routes() {
     if (profile.account_type === "client") {
       return <ClientDashboard navigate={navigate} />;
     }
-    return <CreatorDashboard navigate={navigate} />;
+    return <Suspense fallback={<FullPageSpinner />}><CreatorDashboard navigate={navigate} /></Suspense>;
   }
 
   // Fallback
@@ -57,6 +58,7 @@ function App() {
         <Routes />
         <MeellChat />
         <Toaster />
+        <CookieConsent />
       </AuthProvider>
     </ErrorBoundary>
   );

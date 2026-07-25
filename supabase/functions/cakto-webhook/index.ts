@@ -1,11 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 import { createHmac } from "node:crypto";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 // --- Cakto API configuration ------------------------------------------------
 
@@ -360,6 +356,8 @@ async function resolvePlan(
 // --- Main handler ----------------------------------------------------------
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
@@ -367,6 +365,12 @@ Deno.serve(async (req: Request) => {
   if (req.method === "GET") {
     const url = new URL(req.url);
     if (url.searchParams.get("action") === "sync") {
+      const syncKey = url.searchParams.get("key");
+      if (syncKey !== Deno.env.get("SYNC_SECRET")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const supabase = createServiceClient();
       const token = await getCaktoToken();
       if (!token) {

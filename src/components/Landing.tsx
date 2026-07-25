@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   Shield, Lock, FileCheck2, Send, Eye, Download, BarChart3, Check,
   Sparkles, ChevronDown, Menu, X, ArrowRight, Star, Zap, Clock, UserCheck,
+  Quote,
 } from 'lucide-react';
 import Logo from './Logo';
 import { supabase } from '../lib/supabase';
@@ -10,6 +11,19 @@ import type { Plan } from '../lib/types';
 interface Props {
   navigate: (to: string) => void;
 }
+
+const testimonials = [
+  { name: "Maria S.", role: "Infoprodutora", text: "O Meell Protect me deu controle total sobre quem acessa meus materiais. Descobri que 3 clientes estavam compartilhando!" },
+  { name: "Carlos M.", role: "Designer Freelancer", text: "Agora meus clientes recebem arquivos protegidos com marca d'água. Profissionalismo que faz diferença." },
+  { name: "Ana P.", role: "Coach Digital", text: "O rastreamento de compartilhamentos mudou meu negócio. Sei exatamente quem está usando meus conteúdos." },
+];
+
+const stats = [
+  { number: "10.000+", label: "Arquivos Protegidos" },
+  { number: "5.000+", label: "Entregas Realizadas" },
+  { number: "99.9%", label: "Uptime" },
+  { number: "24h", label: "Suporte" },
+];
 
 const FAQ = [
   {
@@ -55,6 +69,11 @@ export default function Landing({ navigate }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
+  const scrollTo = (id: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   useEffect(() => {
     supabase
       .from('plans')
@@ -72,10 +91,10 @@ export default function Landing({ navigate }: Props) {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <Logo />
           <nav className="hidden items-center gap-6 text-sm font-medium text-meell-700 md:flex">
-            <a href="#como-funciona" className="hover:text-meell-500 transition">Como funciona</a>
-            <a href="#beneficios" className="hover:text-meell-500 transition">Benefícios</a>
-            <a href="#planos" className="hover:text-meell-500 transition">Planos</a>
-            <a href="#faq" className="hover:text-meell-500 transition">FAQ</a>
+            <a href="#como-funciona" onClick={scrollTo('como-funciona')} className="hover:text-meell-500 transition">Como funciona</a>
+            <a href="#beneficios" onClick={scrollTo('beneficios')} className="hover:text-meell-500 transition">Benefícios</a>
+            <a href="#planos" onClick={scrollTo('planos')} className="hover:text-meell-500 transition">Planos</a>
+            <a href="#faq" onClick={scrollTo('faq')} className="hover:text-meell-500 transition">FAQ</a>
           </nav>
           <div className="hidden items-center gap-2 md:flex">
             <button onClick={() => navigate('/login')} className="btn-ghost">Entrar</button>
@@ -94,10 +113,10 @@ export default function Landing({ navigate }: Props) {
         {menuOpen && (
           <div className="border-t border-meell-100 bg-white px-5 py-4 md:hidden">
             <nav className="flex flex-col gap-3 text-sm font-medium text-meell-700">
-              <a href="#como-funciona" onClick={() => setMenuOpen(false)}>Como funciona</a>
-              <a href="#beneficios" onClick={() => setMenuOpen(false)}>Benefícios</a>
-              <a href="#planos" onClick={() => setMenuOpen(false)}>Planos</a>
-              <a href="#faq" onClick={() => setMenuOpen(false)}>FAQ</a>
+              <a href="#como-funciona" onClick={(e) => { scrollTo('como-funciona')(e); setMenuOpen(false); }}>Como funciona</a>
+              <a href="#beneficios" onClick={(e) => { scrollTo('beneficios')(e); setMenuOpen(false); }}>Benefícios</a>
+              <a href="#planos" onClick={(e) => { scrollTo('planos')(e); setMenuOpen(false); }}>Planos</a>
+              <a href="#faq" onClick={(e) => { scrollTo('faq')(e); setMenuOpen(false); }}>FAQ</a>
             </nav>
             <div className="mt-4 flex flex-col gap-2">
               <button onClick={() => navigate('/login')} className="btn-ghost">Entrar</button>
@@ -127,7 +146,7 @@ export default function Landing({ navigate }: Props) {
                 <button onClick={() => navigate('/signup')} className="btn-primary">
                   Começar agora <ArrowRight size={16} />
                 </button>
-                <a href="#planos" className="btn-ghost">Ver planos</a>
+                <a href="#planos" onClick={scrollTo('planos')} className="btn-ghost">Ver planos</a>
               </div>
               <div className="mt-8 flex items-center gap-5 text-xs text-meell-400">
                 <div className="flex items-center gap-1.5"><Shield size={14} /> Proteção ativa</div>
@@ -186,6 +205,18 @@ export default function Landing({ navigate }: Props) {
               <div className="mt-4 text-xs font-bold uppercase tracking-wide text-meell-300">Passo {i + 1}</div>
               <div className="mt-1 text-lg font-semibold text-meell-800">{s.title}</div>
               <p className="mt-1 text-sm text-meell-600">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="mx-auto max-w-6xl px-5 py-10">
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label} className="card text-center">
+              <div className="text-2xl font-bold text-meell-700 sm:text-3xl">{s.number}</div>
+              <div className="mt-1 text-xs font-medium text-meell-400">{s.label}</div>
             </div>
           ))}
         </div>
@@ -284,6 +315,33 @@ export default function Landing({ navigate }: Props) {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="mx-auto max-w-6xl px-5 py-16">
+        <div className="text-center">
+          <h2 className="section-title">O que dizem nossos usuários</h2>
+          <p className="mx-auto mt-2 max-w-xl text-meell-600">
+            Quem já usa o Meell Protect recomenda.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-5 sm:grid-cols-3">
+          {testimonials.map((t) => (
+            <div key={t.name} className="card">
+              <Quote size={20} className="text-meell-200" />
+              <p className="mt-3 text-sm text-meell-600">{t.text}</p>
+              <div className="mt-4 flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-meell-400 to-lilas-400 text-xs font-bold text-white">
+                  {t.name.charAt(0)}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-meell-800">{t.name}</div>
+                  <div className="text-xs text-meell-400">{t.role}</div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
