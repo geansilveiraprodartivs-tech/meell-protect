@@ -37,6 +37,7 @@ DECLARE
 BEGIN
   FOR t IN SELECT unnest(ARRAY['profiles', 'protected_files', 'clients', 'deliveries', 'plans', 'subscriptions'])
   LOOP
+    EXECUTE format('DROP TRIGGER IF EXISTS set_updated_at ON %I', t);
     EXECUTE format('CREATE TRIGGER set_updated_at BEFORE UPDATE ON %I FOR EACH ROW EXECUTE FUNCTION update_updated_at()', t);
   END LOOP;
 END;
